@@ -70,30 +70,7 @@ def calculate_totals(train_data):
     u2r = buffer_overflow + loadmodule + perl + rootkit
     r2l = ftp_write + guess_passwd + imap + multihop + phf + spy + warezclient + warezmaster
     probe = ipsweep + nmap + portsweep + satan
-    #attacks = len(train_data[train_data['class'] != 'normal.'].index)
-    #normal = len(train_data[train_data['class'] == 'normal.'].index)
-    #back = len(train_data[train_data['class'] == 'back.'].index)
-    #buffer_overflow = len(train_data[train_data['class'] == 'buffer_overflow.'].index)
-    #ftp_write = len(train_data[train_data['class'] == 'ftp_write.'].index)
-    #guess_passwd = len(train_data[train_data['class'] == 'guess_passwd.'].index)
-    #imap = len(train_data[train_data['class'] == 'imap.'].index)
-    #ipsweep = len(train_data[train_data['class'] == 'ipsweep.'].index)
-    #land = len(train_data[train_data['class'] == 'land.'].index)
-    #loadmodule = len(train_data[train_data['class'] == 'loadmodule.'].index)
-    #multihop = len(train_data[train_data['class'] == 'multihop.'].index)
-    #neptune = len(train_data[train_data['class'] == 'neptune.'].index)
-    #nmap = len(train_data[train_data['class'] == 'nmap.'].index)
-    #perl = len(train_data[train_data['class'] == 'perl.'].index)
-    #phf = len(train_data[train_data['class'] == 'phf.'].index)
-    #pod = len(train_data[train_data['class'] == 'pod.'].index)
-    #portsweep = len(train_data[train_data['class'] == 'portsweep.'].index)
-    #rootkit = len(train_data[train_data['class'] == 'rootkit.'].index)
-    #satan = len(train_data[train_data['class'] == 'satan.'].index)
-    #smurf = len(train_data[train_data['class'] == 'smurf.'].index)
-    #spy = len(train_data[train_data['class'] == 'spy.'].index)
-    #teardrop = len(train_data[train_data['class'] == 'teardrop.'].index)
-    #warezclient = len(train_data[train_data['class'] == 'warezclient.'].index)
-    #warezmaster = len(train_data[train_data['class'] == 'warezmaster.'].index)
+
     
     print("Number of attributes: ",len(train_data.columns))
     print("Number of samples that represent ATTACKS: ", attacks)
@@ -196,15 +173,6 @@ def draw_histogram(data, attrib, at_value):
 
 
 def main():
-    #train_data = pd.read_csv("data/kddcup.data.txt")
-
-    #train_data.columns = ['duration','protocol_type','service','flag','src_bytes','dst_bytes','land',
-    #'wrong_fragment','urgent','hot','num_failed_logins','logged_in','num_compromised','root_shell','su_attempted',
-    #'num_root','num_file_creations','num_shells','num_access_files','num_outbound_cmds','is_host_login','is_guest_login','count',
-    #'srv_count','serror_rate','srv_serror_rate','rerror_rate','srv_rerror_rate','same_srv_rate','diff_srv_rate','srv_diff_host_rate',
-    #'dst_host_count','dst_host_srv_count','dst_host_same_srv_rate','dst_host_diff_srv_rate','dst_host_same_src_port_rate',
-    #'dst_host_srv_diff_host_rate','dst_host_serror_rate','dst_host_srv_serror_rate','dst_host_rerror_rate','dst_host_srv_rerror_rate','class']
-
     train_data = pd.read_csv("data/KDDTrain+.txt")
     
     train_data.columns = ['duration','protocol_type','service','flag','src_bytes','dst_bytes','land',
@@ -214,40 +182,40 @@ def main():
     'dst_host_count','dst_host_srv_count','dst_host_same_srv_rate','dst_host_diff_srv_rate','dst_host_same_src_port_rate',
     'dst_host_srv_diff_host_rate','dst_host_serror_rate','dst_host_srv_serror_rate','dst_host_rerror_rate','dst_host_srv_rerror_rate','class','?']#
 
-    #f = open("stats/stats4kdd.txt", "w")
-    f = open("stats/stats4nsl.txt", "w")
+    
+    #f = open("stats/stats4nsl.txt", "w")
     
     
     
     calculate_totals(train_data)
-    protocol_type = compare_att_2_type(train_data,'protocol_type')
-    print("For protocol_type attribute: ",protocol_type )
-    f.write(str(protocol_type))
-    f.write("\n \n")
-    print("--------------------------------------------")
-    service = compare_att_2_type(train_data,'service')
-    print("For service attribute: ", service)
-    f.write(str(service))
-    f.write("\n \n")
-    print("--------------------------------------------")
-    flag = compare_att_2_type(train_data,'flag')
-    print("For flag attribute: ",flag)
-    f.write(str(flag))
-    f.write("\n \n")
-    print("--------------------------------------------")
-    logged_in = compare_att_2_type(train_data,'logged_in')
-    print("For logged_in attribute: ",logged_in)
-    print("--------------------------------------------")
-    is_host_login = compare_att_2_type(train_data,'is_host_login')
-    print("For is_host_login attribute: ",is_host_login)
-    print("--------------------------------------------")
-    is_guest_login = compare_att_2_type(train_data,'is_guest_login')
-    print("For is_guest_login attribute: ",is_guest_login)
-    print("--------------------------------------------")
-    f.close()
-    print(draw_histogram(train_data,'protocol_type','udp'))
-    for i in poss_attr['service']:
-        print(draw_histogram(train_data,'service',i))
+    #protocol_type = compare_att_2_type(train_data,'protocol_type')
+    #print("For protocol_type attribute: ",protocol_type )
+    #f.write(str(protocol_type))
+    #f.write("\n \n")
+    #print("--------------------------------------------")
+    #service = compare_att_2_type(train_data,'service')
+    #print("For service attribute: ", service)
+    #f.write(str(service))
+    #f.write("\n \n")
+    #print("--------------------------------------------")
+    #flag = compare_att_2_type(train_data,'flag')
+    #print("For flag attribute: ",flag)
+    #f.write(str(flag))
+    #f.write("\n \n")
+    #print("--------------------------------------------")
+    #logged_in = compare_att_2_type(train_data,'logged_in')
+    #print("For logged_in attribute: ",logged_in)
+    #print("--------------------------------------------")
+    #is_host_login = compare_att_2_type(train_data,'is_host_login')
+    #print("For is_host_login attribute: ",is_host_login)
+    #print("--------------------------------------------")
+    #is_guest_login = compare_att_2_type(train_data,'is_guest_login')
+    #print("For is_guest_login attribute: ",is_guest_login)
+    #print("--------------------------------------------")
+    #f.close()
+    #print(draw_histogram(train_data,'protocol_type','udp'))
+    #for i in poss_attr['service']:
+    #    print(draw_histogram(train_data,'service',i))
     #print(len(train_data.index))
     #shown_at = []
     #for i in train_data.index:
