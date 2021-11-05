@@ -120,7 +120,6 @@ def compare_att_2_type(pd, attribute):
     not_attacks_pd = pd[pd['class'] == 'normal']
     total_attakcs = len(pd[pd['class'] != 'normal'].index)
     
-    
     #Create list with the possible values that the attribute can have
     att_values = poss_attr[attribute]
     
@@ -141,7 +140,6 @@ def compare_att_2_type(pd, attribute):
         
 
     return value_att
-    
 
 def draw_histogram(data, attrib, at_value):
     if(attrib not in poss_attr.keys()):
@@ -159,7 +157,6 @@ def draw_histogram(data, attrib, at_value):
             #Total attacks with that value
             at_val = len(at[at[attrib] == at_value].index)
             go_val = len(go[go[attrib] == at_value].index)
-
             fig = plt.figure()
             ax = fig.add_subplot(1,1,1)
             plt.ylim(0,tot_val)
@@ -170,7 +167,18 @@ def draw_histogram(data, attrib, at_value):
             corr = "Figure saved!"
             return corr
 
+def get_outliers(data):
+    total_outliers = 0
+    for i in poss_attr: 
+        for j in poss_attr[i]:
+            all_values = data[data[i] == j] #All the samples with a concrete value for an attribute
+            if((all_values['class'] == 'normal').all() or (all_values['class'] != 'normal').all()):
+                total_outliers += len(all_values.index)
+    return total_outliers
 
+
+    
+            
 
 def main():
     train_data = pd.read_csv("data/KDDTrain+.txt")
@@ -213,9 +221,7 @@ def main():
     #print("For is_guest_login attribute: ",is_guest_login)
     #print("--------------------------------------------")
     #f.close()
-    #print(draw_histogram(train_data,'protocol_type','udp'))
-    #for i in poss_attr['service']:
-    #    print(draw_histogram(train_data,'service',i))
+
     #print(len(train_data.index))
     #shown_at = []
     #for i in train_data.index:
@@ -224,7 +230,16 @@ def main():
 
     #print(shown_at)
     #print(len(shown_at))
-    print(train_data)
+    ##Get the number of outliers; atributes that for a value are all atacks or all normal
+    print(get_outliers(train_data))
+    
+    ##Code to obtain all the histograms for non numeric data
+    #for i in poss_attr:
+    #    for j in poss_attr[i]:
+    #        print(draw_histogram(train_data,i,j))
+    
+    #print(get_outliers(train_data))
+    #print(train_data)
     
 if __name__ == '__main__':
     main()
