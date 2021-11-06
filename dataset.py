@@ -8,8 +8,12 @@ poss_attr = {'protocol_type': ['tcp','udp', 'icmp'], 'service' : ['aol', 'auth',
             'imap4', 'IRC', 'iso_tsap', 'klogin', 'kshell', 'ldap', 'link', 'login', 'mtp', 'name', 'netbios_dgm', 'netbios_ns', 'netbios_ssn', 'netstat', 'nnsp',
             'nntp', 'ntp_u', 'other', 'pm_dump', 'pop_2', 'pop_3', 'printer', 'private', 'red_i', 'remote_job', 'rje', 'shell', 'smtp', 'sql_net', 'ssh', 'sunrpc', 
             'supdup', 'systat', 'telnet', 'tftp_u', 'tim_i', 'time', 'urh_i', 'urp_i', 'uucp', 'uucp_path', 'vmnet', 'whois', 'X11', 'Z39_50'], 
-            'flag' : [ 'OTH', 'REJ', 'RSTO', 'RSTOS0', 'RSTR', 'S0', 'S1', 'S2', 'S3', 'SF', 'SH'],'land': ['0', '1'], 'logged_in' : ['0', '1'],'is_host_login' :['0','1'], 
-            'is_guest_login' : ['0','1']}
+            'flag' : [ 'OTH', 'REJ', 'RSTO', 'RSTOS0', 'RSTR', 'S0', 'S1', 'S2', 'S3', 'SF', 'SH'],'land': [0, 1], 'logged_in' : [0, 1],'is_host_login' :[0,1], 
+            'is_guest_login' : [0, 1]}
+real_attr = ['duration', 'src_bytes','dst_bytes', 'wrong_fragment', 'urgent', 'hot', 'num_failed_logins', 'num_compromised', 'root_shell', 'su_attempted', 'num_root',
+            'num_file_creations', 'num_shells', 'num_access_files', 'num_outbound_cmds','count','srv_count','serror_rate','srv_serror_rate','rerror_rate','srv_rerror_rate',
+            'same_srv_rate','diff_srv_rate','srv_diff_host_rate','dst_host_count','dst_host_srv_count','dst_host_same_srv_rate','dst_host_diff_srv_rate','dst_host_same_src_port_rate',
+            'dst_host_srv_diff_host_rate','dst_host_serror_rate','dst_host_srv_serror_rate','dst_host_rerror_rate','dst_host_srv_rerror_rate']
 
 def calculate_totals(train_data):
     #Calculate the total number of samples, the samples that correspond to attacks and how many samples are for each attack
@@ -112,8 +116,8 @@ def compare_att_2_type(pd, attribute):
     #att_values = possible values that a certain attribute can have
     #total_samples_attrib = total samples with the attribute value to study
     #match = number of samples that are an attacks with an specified attribute value
-    #Returns in a list the number of attacks that have that value attribute, the percentage above the total of attacks, the percentage that are attacks above the total samples
-    #that contain that attribute value and the percentage that are not attacks respect to the total of samples with that value
+    #Returns in a list the number of attacks that have that value attribute, the percentage over the total of attacks, the percentage that are attacks over the total samples
+    #that contain that attribute value and the percentage that are not attacks over the total of samples with that value
     
 
     attacks_pd = pd[pd['class'] != 'normal']
@@ -141,7 +145,7 @@ def compare_att_2_type(pd, attribute):
 
     return value_att
 
-def draw_histogram(data, attrib, at_value):
+def non_num_histogram(data, attrib, at_value):
     if(attrib not in poss_attr.keys()):
         err = "Attribute not found"
         return err
@@ -162,9 +166,9 @@ def draw_histogram(data, attrib, at_value):
             plt.ylim(0,tot_val)
             ax.bar(['attacks \n {}'.format(at_val)], [at_val], color="r")
             ax.bar(['good \n {}'.format(go_val)], [go_val], color="g")
-            
-            fig.savefig('figures/{}-{}.png'.format(attrib,at_value))
-            corr = "Figure saved!"
+            fig.savefig('figures/non-numeric/{}-{}.png'.format(attrib,at_value))
+            plt.close()
+            corr = "Figure saved!" + str(at_value)
             return corr
 
 def get_outliers(data):
@@ -174,7 +178,29 @@ def get_outliers(data):
             all_values = data[data[i] == j] #All the samples with a concrete value for an attribute
             if((all_values['class'] == 'normal').all() or (all_values['class'] != 'normal').all()):
                 total_outliers += len(all_values.index)
+    print('The total number of outliers is: {}'.format(total_outliers))
     return total_outliers
+
+def num_histograms(data):
+    #Study each attribute with a continuous value and see how many samples are attacks and how many are not depending on the attribute
+    #One histogram represents the samples that are attacks 
+    #The other histogram represents the samples that are legitimate traffic
+    #The x ascis are values between the minimum and the maximum values of each attribute
+    for i in real_attr:    
+        att = data[data['class'] != 'normal']
+        not_att = data[data['class'] == 'normal']
+        min_at = min(data[i])
+        max_at = max(data[i])
+        fig = plt.figure()
+        bins = np.linspace(min_at, max_at)
+        x = att[i]
+        y = not_att[i]
+        plt.hist(x, bins, alpha=0.5, label='attacks')
+        plt.hist(y, bins, alpha=0.5, label='normal')
+        plt.legend(loc='upper right')
+        fig.savefig('figures/numeric/{}.png'.format(i))
+        plt.close()
+
 
 
     
@@ -188,14 +214,13 @@ def main():
     'num_root','num_file_creations','num_shells','num_access_files','num_outbound_cmds','is_host_login','is_guest_login','count',
     'srv_count','serror_rate','srv_serror_rate','rerror_rate','srv_rerror_rate','same_srv_rate','diff_srv_rate','srv_diff_host_rate',
     'dst_host_count','dst_host_srv_count','dst_host_same_srv_rate','dst_host_diff_srv_rate','dst_host_same_src_port_rate',
-    'dst_host_srv_diff_host_rate','dst_host_serror_rate','dst_host_srv_serror_rate','dst_host_rerror_rate','dst_host_srv_rerror_rate','class','?']#
+    'dst_host_srv_diff_host_rate','dst_host_serror_rate','dst_host_srv_serror_rate','dst_host_rerror_rate','dst_host_srv_rerror_rate','class','?']
 
-    
+    ##Compute the number of samples that represent attacks, the number of samples that are legitimate traffic, and how many samples are for each type of attack
+    calculate_totals(train_data)
+
     #f = open("stats/stats4nsl.txt", "w")
     
-    
-    
-    calculate_totals(train_data)
     #protocol_type = compare_att_2_type(train_data,'protocol_type')
     #print("For protocol_type attribute: ",protocol_type )
     #f.write(str(protocol_type))
@@ -222,24 +247,21 @@ def main():
     #print("--------------------------------------------")
     #f.close()
 
-    #print(len(train_data.index))
-    #shown_at = []
-    #for i in train_data.index:
-    #    if(train_data['class'][i] not in shown_at and train_data['class'][i] != 'normal'):
-    #        shown_at.append(train_data['class'][i])
+    
 
-    #print(shown_at)
-    #print(len(shown_at))
     ##Get the number of outliers; atributes that for a value are all atacks or all normal
-    print(get_outliers(train_data))
+    outl = get_outliers(train_data)
+    p_outl = (outl/len(train_data.index))*100
+    print("Percentage of outliers over the total of samples: {}".format(p_outl))
+    ##Obtain all the histograms for numeric values of the attributes
+    num_histograms(train_data)
     
-    ##Code to obtain all the histograms for non numeric data
-    #for i in poss_attr:
-    #    for j in poss_attr[i]:
-    #        print(draw_histogram(train_data,i,j))
+    ##Obtain all the histograms for non numeric values of the attributes
+    for i in poss_attr:
+        for j in poss_attr[i]:
+            print(non_num_histogram(train_data,i,j))
     
-    #print(get_outliers(train_data))
-    #print(train_data)
+   
     
 if __name__ == '__main__':
     main()
