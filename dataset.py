@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import math
+import copy
 
 poss_attr = {'protocol_type': ['tcp','udp', 'icmp'], 'service' : ['aol', 'auth', 'bgp', 'courier', 'csnet_ns', 'ctf', 'daytime', 'discard', 'domain', 'domain_u',
             'echo', 'eco_i', 'ecr_i', 'efs', 'exec', 'finger', 'ftp', 'ftp_data', 'gopher', 'harvest', 'hostnames', 'http', 'http_2784', 'http_443', 'http_8001', 
@@ -175,12 +175,24 @@ def get_outliers(data):
     #Calculate the number of outliers (total_outliers) and a list with a pair attribute-value of those that are outliers (at_val)
     total_outliers = 0
     at_val = []
-    for i in poss_attr: 
-        for j in poss_attr[i]:
+    for i in poss_attr: #Attribute
+        for j in poss_attr[i]: #Value
             all_values = data[data[i] == j] #All the samples with a concrete value for an attribute
             if((all_values['class'] == 'normal').all() or (all_values['class'] != 'normal').all()):
                 at_val.append([i,j])
                 total_outliers += len(all_values.index)
+
+    #Check if of the samples calculated are duplicaded, i.e, if all the samples that are 'flag' == 'RSTOS0' are also 'service' == 'aol' we don't need to count them
+    #individually
+    rep = 0
+    at_val_aux = copy.deepcopy(at_val)
+    for i in at_val_aux:    
+        aux = data[data[i[0]] == i[1]]
+        for j in at_val_aux:
+            if(j[0] != i[0]):
+                rep += len((aux[aux[j[0]] == j[1]]).index)
+        at_val_aux.remove([i[0],i[1]])
+    total_outliers -= rep
     print('The total number of outliers is: {}'.format(total_outliers))
     return total_outliers,at_val
 
@@ -268,7 +280,25 @@ def main():
     data_wo_outliers = remove_outliers(train_data,at_val)
     print(len(data_wo_outliers.index))
     print(len(train_data.index))
-   
+
+    #res = 0
+    #for i in at_val:
+    #    if(i[0] == 'service'):
+    #        aux1 = train_data[train_data['service'] == i[1]]
+    #        
+    #        res += (len((aux1[aux1['flag'] == 'RSTOS0']).index))
+    #        res +=(len((aux1[aux1['is_host_login'] == 1]).index))
+    #res = 0
+    #for i in at_val:    
+    #    aux1 = train_data[train_data[i[0]] == i[1]]
+    #    for j in at_val:
+    #        if(j[0] != i[0]):
+    #            res += len((aux1[aux1[j[0]] == j[1]]).index)
+    #    at_val.remove([i[0],i[1]])
+
+
+    #print(res)
+
     ##Obtain all the histograms for numeric values of the attributes
     #num_histograms(train_data)
     
