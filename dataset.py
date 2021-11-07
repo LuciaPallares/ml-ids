@@ -172,14 +172,17 @@ def non_num_histogram(data, attrib, at_value):
             return corr
 
 def get_outliers(data):
+    #Calculate the number of outliers (total_outliers) and a list with a pair attribute-value of those that are outliers (at_val)
     total_outliers = 0
+    at_val = []
     for i in poss_attr: 
         for j in poss_attr[i]:
             all_values = data[data[i] == j] #All the samples with a concrete value for an attribute
             if((all_values['class'] == 'normal').all() or (all_values['class'] != 'normal').all()):
+                at_val.append([i,j])
                 total_outliers += len(all_values.index)
     print('The total number of outliers is: {}'.format(total_outliers))
-    return total_outliers
+    return total_outliers,at_val
 
 def num_histograms(data):
     #Study each attribute with a continuous value and see how many samples are attacks and how many are not depending on the attribute
@@ -200,6 +203,13 @@ def num_histograms(data):
         plt.legend(loc='upper right')
         fig.savefig('figures/numeric/{}.png'.format(i))
         plt.close()
+
+def remove_outliers(data, at_value):
+    aux_data = data
+    for i in at_value:
+        aux_data = aux_data.loc[aux_data[i[0]] != i[1]]
+
+    return aux_data
 
 
 
@@ -250,17 +260,62 @@ def main():
     
 
     ##Get the number of outliers; atributes that for a value are all atacks or all normal
-    outl = get_outliers(train_data)
+    outl, at_val = get_outliers(train_data)
     p_outl = (outl/len(train_data.index))*100
     print("Percentage of outliers over the total of samples: {}".format(p_outl))
+    
+    ##Remove the outliers obtained in the list at_val
+    data_wo_outliers = remove_outliers(train_data,at_val)
+    print(len(data_wo_outliers.index))
+    print(len(train_data.index))
+   
     ##Obtain all the histograms for numeric values of the attributes
-    num_histograms(train_data)
+    #num_histograms(train_data)
     
     ##Obtain all the histograms for non numeric values of the attributes
-    for i in poss_attr:
-        for j in poss_attr[i]:
-            print(non_num_histogram(train_data,i,j))
+    #for i in poss_attr:
+    #    for j in poss_attr[i]:
+    #        print(non_num_histogram(train_data,i,j))
+
+    #att = train_data[train_data['class'] != 'normal']
+    #not_att = train_data[train_data['class'] == 'normal']
+
+    #min_at1 = min(train_data['dst_host_srv_count'])
+    #max_at1 = max(train_data['dst_host_srv_count'])
+    #bins = np.linspace(min_at1, max_at1)
+    #x1 = att['dst_host_srv_count']
+    #y1 = not_att['dst_host_srv_count']
     
+    #fig = plt.figure()
+    #fig, (ax1, ax2, ax3) = plt.subplots(1, 3)
+    #fig.set_figheight(5)
+    #fig.set_figwidth(15)
+    #ax1.hist(x1, bins, alpha=0.5, label='attacks')
+    #ax1.hist(y1, bins, alpha=0.5, label='normal')
+    #ax1.legend(loc='upper right')
+    #ax1.set_title('dst_host_srv_count')
+    
+    #min_at2 = min(train_data['dst_host_diff_srv_rate'])
+    #max_at2 = max(train_data['dst_host_diff_srv_rate'])
+    #bins2 = np.linspace(min_at2, max_at2)
+    #x2 = att['dst_host_diff_srv_rate']
+    #y2 = not_att['dst_host_diff_srv_rate']
+    #ax2.hist(x2, bins2, alpha=0.5, label='attacks')
+    #ax2.hist(y2, bins2, alpha=0.5, label='normal')
+    #ax2.legend(loc='upper right')
+    #ax2.set_title('dst_host_diff_srv_rate')
+
+    #min_at3 = min(train_data['srv_count'])
+    #max_at3= max(train_data['srv_count'])
+    #bins3 = np.linspace(min_at3, max_at3)
+    #x3 = att['srv_count']
+    #y3 = not_att['srv_count']
+    #ax3.hist(x3, bins3, alpha=0.5, label='attacks')
+    #ax3.hist(y3, bins3, alpha=0.5, label='normal')
+    #ax3.legend(loc='upper right')
+    #ax3.set_title('srv_count')
+    #fig.savefig('numeric-ex.png')
+    #plt.close()
    
     
 if __name__ == '__main__':
