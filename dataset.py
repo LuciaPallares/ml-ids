@@ -2,6 +2,8 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import copy
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
 
 poss_attr = {'protocol_type': ['tcp','udp', 'icmp'], 'service' : ['aol', 'auth', 'bgp', 'courier', 'csnet_ns', 'ctf', 'daytime', 'discard', 'domain', 'domain_u',
             'echo', 'eco_i', 'ecr_i', 'efs', 'exec', 'finger', 'ftp', 'ftp_data', 'gopher', 'harvest', 'hostnames', 'http', 'http_2784', 'http_443', 'http_8001', 
@@ -14,7 +16,8 @@ real_attr = ['duration', 'src_bytes','dst_bytes', 'wrong_fragment', 'urgent', 'h
             'num_file_creations', 'num_shells', 'num_access_files', 'num_outbound_cmds','count','srv_count','serror_rate','srv_serror_rate','rerror_rate','srv_rerror_rate',
             'same_srv_rate','diff_srv_rate','srv_diff_host_rate','dst_host_count','dst_host_srv_count','dst_host_same_srv_rate','dst_host_diff_srv_rate','dst_host_same_src_port_rate',
             'dst_host_srv_diff_host_rate','dst_host_serror_rate','dst_host_srv_serror_rate','dst_host_rerror_rate','dst_host_srv_rerror_rate']
-
+attacks = ['back','buffer_overflow','ftp_write','guess_passwd','imap','ipsweep','land','loadmodule','multihop','neptune','nmap','perl','phf','pod','portsweep',
+            'rootkit','satan','smurf','spy','teardrop','warezclient','warezmaster']
 def calculate_totals(train_data):
     #Calculate the total number of samples, the samples that correspond to attacks and how many samples are for each attack
     attacks = 0
@@ -221,8 +224,77 @@ def remove_outliers(data, at_value):
     for i in at_value:
         aux_data = aux_data.loc[aux_data[i[0]] != i[1]]
 
+    aux_data.reset_index(drop=True, inplace=True)
+
     return aux_data
 
+def compute_pca(data):
+    #Here we are first applying a correspondence between the nominal values of the attribute and a number in order to apply then a PCA.
+    #Normal = 0 
+    #Attack != 0 - (Different attacks have different numbers)
+    features = list(data.columns)
+    #Remove '?' and 'class' from features
+    features = features[:-2]
+
+    aux_d = copy.deepcopy(data)
+    ##Correspondence with nominal values except class
+    nom_att = {}
+    id = 0
+    for i in poss_attr:
+        nom_att[i]={}
+        for j in poss_attr[i]:
+            nom_att[i][j]=id
+            id+=1
+    ##Correspondence for class attribute
+    #att_num = {}
+    #Id = 0 reservado para tráfico normal
+    #id = 1
+    #for i in attacks:
+    #    att_num[i] = id
+    #    id += 1
+
+    ##Apply correspondence to the dataset
+    for j in nom_att: 
+        for x in nom_att[j]: 
+            aux_d[j].replace({x : nom_att[j][x] }, inplace=True)
+
+    #for i in att_num:
+    #    aux_d['class'].replace({i : att_num[i]}, inplace=True)
+    #aux_d['class'].replace({'normal' : 0}, inplace=True)
+
+    #aux_d.drop(['?'],axis = 1)
+    ##Apply normalization based on standard deviation
+    x = aux_d.loc[:, features].values
+    y = aux_d.loc[:,['class']].values
+    x = StandardScaler().fit_transform(x)
+    
+    ##Apply PCA
+    pca = PCA(n_components=2)
+    principalComponents = pca.fit_transform(x)
+    principalDf = pd.DataFrame(data = principalComponents, columns = ['component 1', 'component 2'])
+    finalDf = pd.concat([principalDf, aux_d[['class']]], axis = 1)
+
+    fig = plt.figure(figsize = (10,10))
+    ax = fig.add_subplot(1,1,1) 
+    ax.set_xlabel('PC 1')   
+    ax.set_ylabel('PC 2')
+    targets = ['normal','back','buffer_overflow','ftp_write','guess_passwd','imap','ipsweep','land','loadmodule','multihop','neptune','nmap','perl','phf','pod','portsweep',
+            'rootkit','satan','smurf','spy','teardrop','warezclient','warezmaster']
+
+    for target in targets:
+        indicesToKeep = finalDf['class'] == target
+        ax.scatter(finalDf.loc[indicesToKeep, 'component 1']
+               , finalDf.loc[indicesToKeep, 'component 2']
+               , s = 50)
+    ax.legend(targets)
+    #ax.grid()
+    fig.savefig('pca_comp.png')
+    plt.close()
+
+    
+   
+    
+    
 
 
     
@@ -269,7 +341,6 @@ def main():
     #print("--------------------------------------------")
     #f.close()
 
-    
 
     ##Get the number of outliers; atributes that for a value are all atacks or all normal
     outl, at_val = get_outliers(train_data)
@@ -281,23 +352,9 @@ def main():
     print(len(data_wo_outliers.index))
     print(len(train_data.index))
 
-    #res = 0
-    #for i in at_val:
-    #    if(i[0] == 'service'):
-    #        aux1 = train_data[train_data['service'] == i[1]]
-    #        
-    #        res += (len((aux1[aux1['flag'] == 'RSTOS0']).index))
-    #        res +=(len((aux1[aux1['is_host_login'] == 1]).index))
-    #res = 0
-    #for i in at_val:    
-    #    aux1 = train_data[train_data[i[0]] == i[1]]
-    #    for j in at_val:
-    #        if(j[0] != i[0]):
-    #            res += len((aux1[aux1[j[0]] == j[1]]).index)
-    #    at_val.remove([i[0],i[1]])
-
-
-    #print(res)
+    ##Principal component analysis
+    #print(list(train_data.columns))
+    compute_pca(data_wo_outliers)
 
     ##Obtain all the histograms for numeric values of the attributes
     #num_histograms(train_data)
