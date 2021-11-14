@@ -1,9 +1,12 @@
 import pandas as pd
 import numpy as np
+import scipy as sc
+import seaborn as sns
 import matplotlib.pyplot as plt
 import copy
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
+
 
 poss_attr = {'protocol_type': ['tcp','udp', 'icmp'], 'service' : ['aol', 'auth', 'bgp', 'courier', 'csnet_ns', 'ctf', 'daytime', 'discard', 'domain', 'domain_u',
             'echo', 'eco_i', 'ecr_i', 'efs', 'exec', 'finger', 'ftp', 'ftp_data', 'gopher', 'harvest', 'hostnames', 'http', 'http_2784', 'http_443', 'http_8001', 
@@ -79,7 +82,7 @@ def calculate_totals(train_data):
     probe = ipsweep + nmap + portsweep + satan
 
     
-    print("Number of attributes: ",len(train_data.columns))
+    print("Number of attributes: ",(len(train_data.columns)))
     print("Number of samples that represent ATTACKS: ", attacks)
     print("Number of samples that represent NORMAL TRAFFIC: ", normal)
     print("Number of total samples: ", normal + attacks)
@@ -230,75 +233,88 @@ def remove_outliers(data, at_value):
 
 def compute_pca(data):
     #Here we are first applying a correspondence between the nominal values of the attribute and a number in order to apply then a PCA.
-    #Normal = 0 
-    #Attack != 0 - (Different attacks have different numbers)
-    features = list(data.columns)
-    #Remove '?' and 'class' from features
-    features = features[:-2]
-
+    #We need to apply this only on the attributes that are numeric so we need to select those (drop protocol, service and flag) 
     aux_d = copy.deepcopy(data)
-    ##Correspondence with nominal values except class
-    nom_att = {}
-    id = 0
-    for i in poss_attr:
-        nom_att[i]={}
-        for j in poss_attr[i]:
-            nom_att[i][j]=id
-            id+=1
-    ##Correspondence for class attribute
-    #att_num = {}
-    #Id = 0 reservado para tráfico normal
-    #id = 1
-    #for i in attacks:
-    #    att_num[i] = id
-    #    id += 1
+    aux_d.drop(columns=['protocol_type', 'service', 'flag','land', 'logged_in','is_host_login','is_guest_login'],inplace = True)
+    features = list(aux_d.columns)
+    #Remove'class' from features
+    features = features[:-1]
 
-    ##Apply correspondence to the dataset
-    for j in nom_att: 
-        for x in nom_att[j]: 
-            aux_d[j].replace({x : nom_att[j][x] }, inplace=True)
-
-    #for i in att_num:
-    #    aux_d['class'].replace({i : att_num[i]}, inplace=True)
-    #aux_d['class'].replace({'normal' : 0}, inplace=True)
-
-    #aux_d.drop(['?'],axis = 1)
-    ##Apply normalization based on standard deviation
+    #Apply normalization based on standard deviation
     x = aux_d.loc[:, features].values
+    #Extract 'class' attribute
     y = aux_d.loc[:,['class']].values
     x = StandardScaler().fit_transform(x)
     
+    #Select the number of components.
+    #To select the number of components we will apply PCA for different number of components and will see the variance explained for each
+    
+    #The number of attributes introduced will be given by the length of features
+    #tot_att = len(features)
+    #print(tot_att)
+    #exp_var_r = []
+    #ran = np.arange(1,tot_att)
+    #for n in ran:
+    #    pca_n = PCA(n_components=n).fit(x)
+    #    exp_var_r.append(round(sum(list(pca_n.explained_variance_ratio_))*100,2)) #Variance ratio explained by the n components
+
+    #print(exp_var_r)
+    #fig = plt.figure(figsize=(15,10))
+    #ax = fig.add_subplot(1,1,1)
+    #ax.set_xlabel('number of components')   
+    #ax.set_ylabel('total variance explained in %')
+    #plt.ylim(0,110)
+    #plt.xticks(ran)
+    #ax.plot(ran,exp_var_r, marker='o', linestyle='--', color='b')
+    #ax.axhline(y=95, color='r', linestyle='-')
+    #ax.axvline(x=21, color='g', linestyle='--')
+    #ax.text(1, 90, '95%', color = 'red', fontsize=16)
+    #ax.text(21, 90, '21 components', color = 'g', fontsize=16)
+    #fig.savefig('pca_comp.png')
+
+
     ##Apply PCA
-    pca = PCA(n_components=2)
+    pca = PCA(n_components=0.95) #Here we esablish that we want an explained variance ratio above 95%
     principalComponents = pca.fit_transform(x)
-    principalDf = pd.DataFrame(data = principalComponents, columns = ['component 1', 'component 2'])
+    print('Total variance explained {}'.format(round(sum(list(pca.explained_variance_ratio_))*100, 2)))
+    print('Number of components used to achieve this {}'.format(pca.n_components_))
+    col = ['component {}'.format(i) for i in np.arange(1,(pca.n_components_ +1))]
+    principalDf = pd.DataFrame(data = principalComponents, columns = col)
     finalDf = pd.concat([principalDf, aux_d[['class']]], axis = 1)
 
-    fig = plt.figure(figsize = (10,10))
-    ax = fig.add_subplot(1,1,1) 
-    ax.set_xlabel('PC 1')   
-    ax.set_ylabel('PC 2')
-    targets = ['normal','back','buffer_overflow','ftp_write','guess_passwd','imap','ipsweep','land','loadmodule','multihop','neptune','nmap','perl','phf','pod','portsweep',
-            'rootkit','satan','smurf','spy','teardrop','warezclient','warezmaster']
-
-    for target in targets:
-        indicesToKeep = finalDf['class'] == target
-        ax.scatter(finalDf.loc[indicesToKeep, 'component 1']
-               , finalDf.loc[indicesToKeep, 'component 2']
-               , s = 50)
-    ax.legend(targets)
-    #ax.grid()
-    fig.savefig('pca_comp.png')
-    plt.close()
-
-    
-   
-    
-    
+    return finalDf
 
 
+
+def compute_pearson_corr(data):
+    #We need to apply this only on the attributes that are numeric so we need to select those (drop protocol, service and flag) 
+    #We will return the correlation matrix
+    dat = copy.deepcopy(data)
+    dat.drop(columns=['protocol_type', 'service', 'flag','land', 'logged_in','is_host_login','is_guest_login'],inplace = True)
+    c = dat.corr(method='pearson')
     
-            
+    plt.figure(figsize=(20,15))
+    sns.set(font_scale = 0.5)
+    hm = sns.heatmap(c, annot=True, vmin=-1, vmax=1)
+    hm.set_title('Correlation heatmap')
+    plt.savefig('heatmap.png')
+
+    #Select only an interesting subset of the correlation matrix to show (from 'count' to the end)
+    subs = c.copy(deep=True)
+    shape = subs.shape
+    subs.drop(subs.loc[:,'duration':'num_outbound_cmds'], axis = 1, inplace = True)
+    red_colu = len(subs.columns)
+    rows_to_remove = shape[0]- red_colu
+    subs.drop(subs.index[:rows_to_remove], inplace = True)
+    plt.figure(figsize=(20,15))
+    sns.set(font_scale = 0.5)
+    hm_s = sns.heatmap(subs, annot=True, vmin=-1, vmax=1)
+    hm_s.set_title('Subset of correlation heatmap')
+    plt.savefig('heatmap_subset.png')
+    
+    return c
+
+        
 
 def main():
     train_data = pd.read_csv("data/KDDTrain+.txt")
@@ -309,6 +325,8 @@ def main():
     'srv_count','serror_rate','srv_serror_rate','rerror_rate','srv_rerror_rate','same_srv_rate','diff_srv_rate','srv_diff_host_rate',
     'dst_host_count','dst_host_srv_count','dst_host_same_srv_rate','dst_host_diff_srv_rate','dst_host_same_src_port_rate',
     'dst_host_srv_diff_host_rate','dst_host_serror_rate','dst_host_srv_serror_rate','dst_host_rerror_rate','dst_host_srv_rerror_rate','class','?']
+    
+    train_data.drop(columns=['?'], inplace=True)
 
     ##Compute the number of samples that represent attacks, the number of samples that are legitimate traffic, and how many samples are for each type of attack
     calculate_totals(train_data)
@@ -349,13 +367,16 @@ def main():
     
     ##Remove the outliers obtained in the list at_val
     data_wo_outliers = remove_outliers(train_data,at_val)
-    print(len(data_wo_outliers.index))
-    print(len(train_data.index))
+    print("Total samples once outliers are removed: {}". format(len(data_wo_outliers.index)))
+    
 
-    ##Principal component analysis
-    #print(list(train_data.columns))
-    compute_pca(data_wo_outliers)
+    ##Principal component analysis PCA
+    data_pca = compute_pca(data_wo_outliers)
+    print(data_pca)
 
+    ##Pearson correlation analysis
+    data_corr = compute_pearson_corr(data_wo_outliers)
+    
     ##Obtain all the histograms for numeric values of the attributes
     #num_histograms(train_data)
     
@@ -405,7 +426,5 @@ def main():
     #plt.close()
    
     
-if __name__ == '__main__':
-    main()
 
 
