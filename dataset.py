@@ -250,13 +250,13 @@ def compute_pca(data):
     #To select the number of components we will apply PCA for different number of components and will see the variance explained for each
     
     #The number of attributes introduced will be given by the length of features
-    #tot_att = len(features)
-    #print(tot_att)
-    #exp_var_r = []
-    #ran = np.arange(1,tot_att)
-    #for n in ran:
-    #    pca_n = PCA(n_components=n).fit(x)
-    #    exp_var_r.append(round(sum(list(pca_n.explained_variance_ratio_))*100,2)) #Variance ratio explained by the n components
+    tot_att = len(features)
+    print(tot_att)
+    exp_var_r = []
+    ran = np.arange(1,tot_att)
+    for n in ran:
+        pca_n = PCA(n_components=n).fit(x)
+        exp_var_r.append(round(sum(list(pca_n.explained_variance_ratio_))*100,2)) #Variance ratio explained by the n components
 
     #print(exp_var_r)
     #fig = plt.figure(figsize=(15,10))
@@ -270,7 +270,7 @@ def compute_pca(data):
     #ax.axvline(x=21, color='g', linestyle='--')
     #ax.text(1, 90, '95%', color = 'red', fontsize=16)
     #ax.text(21, 90, '21 components', color = 'g', fontsize=16)
-    #fig.savefig('pca_comp.png')
+    #fig.savefig('figures/pca_comp.png')
 
 
     ##Apply PCA
@@ -280,7 +280,8 @@ def compute_pca(data):
     print('Number of components used to achieve this {}'.format(pca.n_components_))
     col = ['component {}'.format(i) for i in np.arange(1,(pca.n_components_ +1))]
     principalDf = pd.DataFrame(data = principalComponents, columns = col)
-    finalDf = pd.concat([principalDf, aux_d[['class']]], axis = 1)
+    finalDf = pd.concat([data['protocol_type'],data['service'],data['flag'],data['land'],data['logged_in'],data['is_host_login'],
+            data['is_guest_login'],principalDf, aux_d[['class']]], axis = 1)
 
     return finalDf
 
@@ -291,28 +292,42 @@ def compute_pearson_corr(data):
     #We will return the correlation matrix
     dat = copy.deepcopy(data)
     dat.drop(columns=['protocol_type', 'service', 'flag','land', 'logged_in','is_host_login','is_guest_login'],inplace = True)
-    c = dat.corr(method='pearson')
+    c = dat.corr(method='pearson').abs() #abs() ??
     
-    plt.figure(figsize=(20,15))
-    sns.set(font_scale = 0.5)
-    hm = sns.heatmap(c, annot=True, vmin=-1, vmax=1)
-    hm.set_title('Correlation heatmap')
-    plt.savefig('heatmap.png')
+    #plt.figure(figsize=(20,15))
+    #sns.set(font_scale = 0.5)
+    #hm = sns.heatmap(c, annot=True, vmin=-1, vmax=1)
+    #hm.set_title('Correlation heatmap')
+    #plt.savefig('figures/heatmap.png')
+    #print(c)
 
-    #Select only an interesting subset of the correlation matrix to show (from 'count' to the end)
-    subs = c.copy(deep=True)
-    shape = subs.shape
-    subs.drop(subs.loc[:,'duration':'num_outbound_cmds'], axis = 1, inplace = True)
-    red_colu = len(subs.columns)
-    rows_to_remove = shape[0]- red_colu
-    subs.drop(subs.index[:rows_to_remove], inplace = True)
-    plt.figure(figsize=(20,15))
-    sns.set(font_scale = 0.5)
-    hm_s = sns.heatmap(subs, annot=True, vmin=-1, vmax=1)
-    hm_s.set_title('Subset of correlation heatmap')
-    plt.savefig('heatmap_subset.png')
+    #Select only an interesting subset of the correlation matrix to show (from 'count' to the end) In case we want an image to show
+    #subs = c.copy(deep=True)
+    #shape = subs.shape
+    #subs.drop(subs.loc[:,'duration':'num_outbound_cmds'], axis = 1, inplace = True)
+    #red_colu = len(subs.columns)
+    #rows_to_remove = shape[0]- red_colu
+    #subs.drop(subs.index[:rows_to_remove], inplace = True)
+    #plt.figure(figsize=(20,15))
+    #sns.set(font_scale = 0.5)
+    #hm_s = sns.heatmap(subs, annot=True, vmin=-1, vmax=1)
+    #hm_s.set_title('Subset of correlation heatmap')
+    #plt.savefig('figures/heatmap_subset.png')
     
     return c
+
+def att_pearson_corr(data, cor):
+    #First we need to establish a threshold 
+    #If the Pearson coefficient between two attributes if above this threshold we will remove one as we will consider that it's enough information in one
+    aux_d = copy.deepcopy(data)
+    threshold = 0.5
+    #This is a list of dictionaries where the key is the coefficient (above threshold) and the value is a list with the column and the row
+    #Notice that column and row will be the attributes that produce that coefficient
+    #k=1 so we don't keep the diagonal (all elements of the diagonal will be 1)
+    new_df = cor.where(np.triu(np.ones(cor.shape), k=1).astype(np.bool))
+    to_drop = [column for column in new_df.columns if any(new_df[column] > threshold)]
+    aux_d.drop(to_drop, axis=1, inplace =True)
+    return aux_d
 
         
 
@@ -371,12 +386,14 @@ def main():
     
 
     ##Principal component analysis PCA
-    data_pca = compute_pca(data_wo_outliers)
-    print(data_pca)
+    data_pca_red = compute_pca(data_wo_outliers)
+    print(data_pca_red)
 
     ##Pearson correlation analysis
-    data_corr = compute_pearson_corr(data_wo_outliers)
-    
+    corr = compute_pearson_corr(data_wo_outliers)
+    data_pearson_red = att_pearson_corr(data_wo_outliers,corr)
+    print(data_pearson_red)
+
     ##Obtain all the histograms for numeric values of the attributes
     #num_histograms(train_data)
     
