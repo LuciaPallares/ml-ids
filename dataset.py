@@ -1,3 +1,5 @@
+from typing import Protocol
+from numpy.core.fromnumeric import shape
 import pandas as pd
 import numpy as np
 import scipy as sc
@@ -81,38 +83,38 @@ def calculate_totals(train_data):
     r2l = ftp_write + guess_passwd + imap + multihop + phf + spy + warezclient + warezmaster
     probe = ipsweep + nmap + portsweep + satan
 
-    
+    tot = normal + attacks
     print("Number of attributes: ",(len(train_data.columns)))
-    print("Number of samples that represent ATTACKS: ", attacks)
-    print("Number of samples that represent NORMAL TRAFFIC: ", normal)
+    print("Number of samples that represent ATTACKS: ", attacks,";Porcentaje:", round(attacks*100/(normal+attacks),3)," %")
+    print("Number of samples that represent NORMAL TRAFFIC: ",normal, ";Porcentaje:", round(normal*100/(normal+attacks),3)," %")
     print("Number of total samples: ", normal + attacks)
-    print("Number of DoS attacks: ", dos)
-    print("Number of PROBE attacks: ", probe)
-    print("Number of R2L attacks: ", r2l)
-    print("Number of U2R attacks: ", u2r)
+    print("Number of DoS attacks: ", dos, ";Porcentaje:", round(dos*100/tot,3)," %")
+    print("Number of PROBE attacks: ", probe, ";Porcentaje:", round(probe*100/tot,3)," %")
+    print("Number of R2L attacks: ", r2l, ";Porcentaje:", round(r2l*100/tot,3)," %" )
+    print("Number of U2R attacks: ", u2r, ";Porcentaje:", round(u2r*100/tot,3)," %")
     print("--------------------------------------------------------")
-    print("Number of BACK attacks: ", back)
-    print("Number of BUFFER OVERFLOW attacks: ", buffer_overflow)
-    print("Number of FTP WRITE attacks: ", ftp_write)
-    print("Number of GUESS PASSWD attacks: ", guess_passwd)
-    print("Number of IMAP attacks: ", imap)
-    print("Number of IPSWEEP attacks: ", ipsweep)
-    print("Number of LAND attacks: ", land)
-    print("Number of LOADMODULE attacks: ", loadmodule)
-    print("Number of MULTIHOP attacks: ", multihop)
-    print("Number of NEPTUNE attacks: ", neptune)
-    print("Number of NMAP attacks: ", nmap)
-    print("Number of PERL attacks: ", perl)
-    print("Number of PHF attacks: ", phf)
-    print("Number of POD attacks: ", pod)
-    print("Number of PORTSWEEP attacks: ", portsweep)
-    print("Number of ROOTKIT attacks: ", rootkit)
-    print("Number of SATAN attacks: ", satan)
-    print("Number of SMURF attacks: ", smurf)
-    print("Number of SPY attacks: ", spy)
-    print("Number of TEARDROP attacks: ", teardrop)
-    print("Number of WAREZCLIENT attacks: ", warezclient)
-    print("Number of WAREZMASTER attacks: ", warezmaster)
+    print("Number of BACK attacks: ", back, ";Porcentaje:", round(back*100/tot,3)," %")
+    print("Number of BUFFER OVERFLOW attacks: ", buffer_overflow, ";Porcentaje:", round(buffer_overflow*100/tot,3)," %")
+    print("Number of FTP WRITE attacks: ",  ftp_write,  ";Porcentaje:",round(ftp_write*100/tot,3)," %")
+    print("Number of GUESS PASSWD attacks: ",  guess_passwd,  ";Porcentaje:",round(guess_passwd*100/tot,3)," %")
+    print("Number of IMAP attacks: ", imap,  ";Porcentaje:",round(imap*100/tot,3)," %")
+    print("Number of IPSWEEP attacks: ", ipsweep, ";Porcentaje:", round(ipsweep*100/tot,3)," %")
+    print("Number of LAND attacks: ", land,  ";Porcentaje:",round(land*100/tot,3)," %")
+    print("Number of LOADMODULE attacks: ", loadmodule, ";Porcentaje:", round(loadmodule*100/tot,3)," %")
+    print("Number of MULTIHOP attacks: ", multihop,  ";Porcentaje:",round(multihop*100/tot,3)," %")
+    print("Number of NEPTUNE attacks: ", neptune,  ";Porcentaje:",round(neptune*100/tot,3)," %")
+    print("Number of NMAP attacks: ", nmap,  ";Porcentaje:",round(nmap*100/tot,3)," %")
+    print("Number of PERL attacks: ", perl, ";Porcentaje:", round(perl*100/tot,3)," %")
+    print("Number of PHF attacks: ", phf,  ";Porcentaje:",round(phf*100/tot,3)," %")," %"
+    print("Number of POD attacks: ", pod,  ";Porcentaje:",round(pod*100/tot,3)," %")
+    print("Number of PORTSWEEP attacks: ", portsweep, ";Porcentaje:",round(portsweep*100/tot,3)," %")
+    print("Number of ROOTKIT attacks: ", rootkit,  ";Porcentaje:",round(rootkit*100/tot,3)," %")
+    print("Number of SATAN attacks: ", satan,  ";Porcentaje:",round(satan*100/tot,3)," %")
+    print("Number of SMURF attacks: ", smurf,  ";Porcentaje:",round(smurf*100/tot,3)," %")
+    print("Number of SPY attacks: ", spy,  ";Porcentaje:",round(spy*100/tot,3)," %")
+    print("Number of TEARDROP attacks: ", teardrop, ";Porcentaje:", round(teardrop*100/tot,3)," %")
+    print("Number of WAREZCLIENT attacks: ", warezclient, ";Porcentaje:", round(warezclient*100/tot,3)," %")
+    print("Number of WAREZMASTER attacks: ", warezmaster,  ";Porcentaje:",round(warezmaster*100/tot,3)," %")
 
 def compare_att_2_type(pd, attribute):
     #Compare the attributes to the type of data (normal/attack)
@@ -239,9 +241,11 @@ def compute_pca(data):
     features = list(aux_d.columns)
     #Remove'class' from features
     features = features[:-1]
+    #features.remove('class')
 
     #Apply normalization based on standard deviation
     x = aux_d.loc[:, features].values
+    
     #Extract 'class' attribute
     y = aux_d.loc[:,['class']].values
     x = StandardScaler().fit_transform(x)
@@ -250,13 +254,13 @@ def compute_pca(data):
     #To select the number of components we will apply PCA for different number of components and will see the variance explained for each
     
     #The number of attributes introduced will be given by the length of features
-    tot_att = len(features)
-    print(tot_att)
-    exp_var_r = []
-    ran = np.arange(1,tot_att)
-    for n in ran:
-        pca_n = PCA(n_components=n).fit(x)
-        exp_var_r.append(round(sum(list(pca_n.explained_variance_ratio_))*100,2)) #Variance ratio explained by the n components
+    #tot_att = len(features)
+    #print(tot_att)
+    #exp_var_r = []
+    #ran = np.arange(1,tot_att)
+    #for n in ran:
+    #    pca_n = PCA(n_components=n).fit(x)
+    #    exp_var_r.append(round(sum(list(pca_n.explained_variance_ratio_))*100,2)) #Variance ratio explained by the n components
 
     #print(exp_var_r)
     #fig = plt.figure(figsize=(15,10))
@@ -280,8 +284,9 @@ def compute_pca(data):
     print('Number of components used to achieve this {}'.format(pca.n_components_))
     col = ['component {}'.format(i) for i in np.arange(1,(pca.n_components_ +1))]
     principalDf = pd.DataFrame(data = principalComponents, columns = col)
-    finalDf = pd.concat([data['protocol_type'],data['service'],data['flag'],data['land'],data['logged_in'],data['is_host_login'],
-            data['is_guest_login'],principalDf, aux_d[['class']]], axis = 1)
+    #finalDf = pd.concat([data['protocol_type'],data['service'],data['flag'],data['land'],data['logged_in'],data['is_host_login'],
+    #        data['is_guest_login'],principalDf, aux_d[['class']]], axis = 1)
+    finalDf = pd.concat([principalDf, aux_d['class']], axis = 1)
 
     return finalDf
 
@@ -320,13 +325,17 @@ def att_pearson_corr(data, cor):
     #First we need to establish a threshold 
     #If the Pearson coefficient between two attributes if above this threshold we will remove one as we will consider that it's enough information in one
     aux_d = copy.deepcopy(data)
-    threshold = 0.5
-    #This is a list of dictionaries where the key is the coefficient (above threshold) and the value is a list with the column and the row
-    #Notice that column and row will be the attributes that produce that coefficient
-    #k=1 so we don't keep the diagonal (all elements of the diagonal will be 1)
-    new_df = cor.where(np.triu(np.ones(cor.shape), k=1).astype(np.bool))
-    to_drop = [column for column in new_df.columns if any(new_df[column] > threshold)]
-    aux_d.drop(to_drop, axis=1, inplace =True)
+    threshold = 0.7
+    #Create a list to store a bool value that will say if the value we are studying is above the threshold:
+    colum = np.full((cor.shape[0],), True, dtype=bool)
+    #Iterate the dataframe to find the columns that have values above the threshold
+    for i in range(cor.shape[0]):
+        for j in range(i+1, cor.shape[0]):
+            if cor.iloc[i,j] >= threshold and colum[j]:
+                colum[j] = False
+    #In column we have set to false the columns that we are not going to keep as they have a pearson coefficient above the threshold
+    selected_columns = cor.columns[colum]
+    aux_d = aux_d[selected_columns]
     return aux_d
 
         
@@ -377,21 +386,26 @@ def main():
 
     ##Get the number of outliers; atributes that for a value are all atacks or all normal
     outl, at_val = get_outliers(train_data)
-    p_outl = (outl/len(train_data.index))*100
-    print("Percentage of outliers over the total of samples: {}".format(p_outl))
+    p_outl = round((outl/len(train_data.index))*100,3)
+    print("Percentage of outliers over the total of samples: {}".format(p_outl), "%")
     
     ##Remove the outliers obtained in the list at_val
     data_wo_outliers = remove_outliers(train_data,at_val)
     print("Total samples once outliers are removed: {}". format(len(data_wo_outliers.index)))
     
+    data_one_hot_enc = pd.get_dummies(data_wo_outliers, columns=['protocol_type','service','flag', 'land', 'logged_in','is_host_login','is_guest_login'], prefix=['protocol','service','flag','land','log_in','host_login','guest_login'])
+    print(data_one_hot_enc)
+    
 
     ##Principal component analysis PCA
     data_pca_red = compute_pca(data_wo_outliers)
+    print('Dataframe after applying PCA: \n')
     print(data_pca_red)
 
     ##Pearson correlation analysis
     corr = compute_pearson_corr(data_wo_outliers)
     data_pearson_red = att_pearson_corr(data_wo_outliers,corr)
+    print('Dataframe after applying reduction based on Pearson coefficient: \n')
     print(data_pearson_red)
 
     ##Obtain all the histograms for numeric values of the attributes
