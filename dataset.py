@@ -115,6 +115,17 @@ def calculate_totals(train_data):
     print("Number of TEARDROP attacks: ", teardrop, ";Porcentaje:", round(teardrop*100/tot,3)," %")
     print("Number of WAREZCLIENT attacks: ", warezclient, ";Porcentaje:", round(warezclient*100/tot,3)," %")
     print("Number of WAREZMASTER attacks: ", warezmaster,  ";Porcentaje:",round(warezmaster*100/tot,3)," %")
+    
+    fig = plt.figure()
+    ax = fig.add_subplot(1,1,1)
+    
+    ax.bar(['dos \n {} %'.format(round(dos*100/tot,3))], [dos*100/tot], color="r")
+    ax.bar(['probe \n {} %'.format(round(probe*100/tot,3))], [probe*100/tot], color="g")
+    ax.bar(['r2l \n {} %'.format(round(r2l*100/tot,3))], [r2l*100/tot], color="b")
+    ax.bar(['u2r \n {} %'.format(round(u2r*100/tot,3))], [u2r*100/tot], color="y")
+    plt.ylabel('total % ')    
+
+    fig.savefig('figures/type_attack.png')
 
 def compare_att_2_type(pd, attribute):
     #Compare the attributes to the type of data (normal/attack)
