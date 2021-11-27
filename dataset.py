@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import copy
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
+from sklearn import tree
 
 
 poss_attr = {'protocol_type': ['tcp','udp', 'icmp'], 'service' : ['aol', 'auth', 'bgp', 'courier', 'csnet_ns', 'ctf', 'daytime', 'discard', 'domain', 'domain_u',
@@ -244,15 +245,19 @@ def remove_outliers(data, at_value):
 
     return aux_data
 
-def compute_pca(data):
+def compute_pca(data,data_type):
     #Here we are first applying a correspondence between the nominal values of the attribute and a number in order to apply then a PCA.
     #We need to apply this only on the attributes that are numeric so we need to select those (drop protocol, service and flag) 
     aux_d = copy.deepcopy(data)
-    aux_d.drop(columns=['protocol_type', 'service', 'flag','land', 'logged_in','is_host_login','is_guest_login'],inplace = True)
-    features = list(aux_d.columns)
-    #Remove'class' from features
-    features = features[:-1]
-    #features.remove('class')
+    if(data_type == 'wo_out'):
+        #Comment for hot encoding
+        aux_d.drop(columns=['protocol_type', 'service', 'flag','land', 'logged_in','is_host_login','is_guest_login'],inplace = True)
+        features = list(aux_d.columns)
+        #Remove'class' from features. Comment for hot encoding
+        features = features[:-1]
+    else:
+        features = list(aux_d.columns)
+        features.remove('class')
 
     #Apply normalization based on standard deviation
     x = aux_d.loc[:, features].values
@@ -295,20 +300,26 @@ def compute_pca(data):
     print('Number of components used to achieve this {}'.format(pca.n_components_))
     col = ['component {}'.format(i) for i in np.arange(1,(pca.n_components_ +1))]
     principalDf = pd.DataFrame(data = principalComponents, columns = col)
-    #finalDf = pd.concat([data['protocol_type'],data['service'],data['flag'],data['land'],data['logged_in'],data['is_host_login'],
-    #        data['is_guest_login'],principalDf, aux_d[['class']]], axis = 1)
-    finalDf = pd.concat([principalDf, aux_d['class']], axis = 1)
+    
+    if(data_type == 'wo_out'):
+        #Comment the following for hot encoding
+        finalDf = pd.concat([data['protocol_type'],data['service'],data['flag'],data['land'],data['logged_in'],data['is_host_login'],
+                data['is_guest_login'],principalDf, aux_d['class']], axis = 1)
+    else:
+        finalDf = pd.concat([principalDf, aux_d['class']], axis = 1)
 
     return finalDf
 
 
 
-def compute_pearson_corr(data):
+def compute_pearson_corr(data,data_type):
     #We need to apply this only on the attributes that are numeric so we need to select those (drop protocol, service and flag) 
     #We will return the correlation matrix
     dat = copy.deepcopy(data)
-    dat.drop(columns=['protocol_type', 'service', 'flag','land', 'logged_in','is_host_login','is_guest_login'],inplace = True)
-    c = dat.corr(method='pearson').abs() #abs() ??
+    if(data_type == 'wo_out'):
+        dat.drop(columns=['protocol_type', 'service', 'flag','land', 'logged_in','is_host_login','is_guest_login'],inplace = True)
+
+    c = dat.corr(method='pearson').abs() 
     
     #plt.figure(figsize=(20,15))
     #sns.set(font_scale = 0.5)
@@ -332,7 +343,7 @@ def compute_pearson_corr(data):
     
     return c
 
-def att_pearson_corr(data, cor):
+def att_pearson_corr(data, cor,data_type):
     #First we need to establish a threshold 
     #If the Pearson coefficient between two attributes if above this threshold we will remove one as we will consider that it's enough information in one
     aux_d = copy.deepcopy(data)
@@ -347,126 +358,13 @@ def att_pearson_corr(data, cor):
     #In column we have set to false the columns that we are not going to keep as they have a pearson coefficient above the threshold
     selected_columns = cor.columns[colum]
     aux_d = aux_d[selected_columns]
+    if(data_type == 'wo_out'):
+        aux_d = pd.concat([data['protocol_type'],data['service'],data['flag'],data['land'],data['logged_in'],data['is_host_login'],
+                data['is_guest_login'],aux_d], axis = 1)
+        aux_d = pd.concat([aux_d, data['class']], axis = 1)
+    else:
+        aux_d = pd.concat([aux_d, data['class']], axis = 1)
     return aux_d
 
         
-
-def main():
-    train_data = pd.read_csv("data/KDDTrain+.txt")
-    
-    train_data.columns = ['duration','protocol_type','service','flag','src_bytes','dst_bytes','land',
-    'wrong_fragment','urgent','hot','num_failed_logins','logged_in','num_compromised','root_shell','su_attempted',
-    'num_root','num_file_creations','num_shells','num_access_files','num_outbound_cmds','is_host_login','is_guest_login','count',
-    'srv_count','serror_rate','srv_serror_rate','rerror_rate','srv_rerror_rate','same_srv_rate','diff_srv_rate','srv_diff_host_rate',
-    'dst_host_count','dst_host_srv_count','dst_host_same_srv_rate','dst_host_diff_srv_rate','dst_host_same_src_port_rate',
-    'dst_host_srv_diff_host_rate','dst_host_serror_rate','dst_host_srv_serror_rate','dst_host_rerror_rate','dst_host_srv_rerror_rate','class','?']
-    
-    train_data.drop(columns=['?'], inplace=True)
-
-    ##Compute the number of samples that represent attacks, the number of samples that are legitimate traffic, and how many samples are for each type of attack
-    calculate_totals(train_data)
-
-    #f = open("stats/stats4nsl.txt", "w")
-    
-    #protocol_type = compare_att_2_type(train_data,'protocol_type')
-    #print("For protocol_type attribute: ",protocol_type )
-    #f.write(str(protocol_type))
-    #f.write("\n \n")
-    #print("--------------------------------------------")
-    #service = compare_att_2_type(train_data,'service')
-    #print("For service attribute: ", service)
-    #f.write(str(service))
-    #f.write("\n \n")
-    #print("--------------------------------------------")
-    #flag = compare_att_2_type(train_data,'flag')
-    #print("For flag attribute: ",flag)
-    #f.write(str(flag))
-    #f.write("\n \n")
-    #print("--------------------------------------------")
-    #logged_in = compare_att_2_type(train_data,'logged_in')
-    #print("For logged_in attribute: ",logged_in)
-    #print("--------------------------------------------")
-    #is_host_login = compare_att_2_type(train_data,'is_host_login')
-    #print("For is_host_login attribute: ",is_host_login)
-    #print("--------------------------------------------")
-    #is_guest_login = compare_att_2_type(train_data,'is_guest_login')
-    #print("For is_guest_login attribute: ",is_guest_login)
-    #print("--------------------------------------------")
-    #f.close()
-
-
-    ##Get the number of outliers; atributes that for a value are all atacks or all normal
-    outl, at_val = get_outliers(train_data)
-    p_outl = round((outl/len(train_data.index))*100,3)
-    print("Percentage of outliers over the total of samples: {}".format(p_outl), "%")
-    
-    ##Remove the outliers obtained in the list at_val
-    data_wo_outliers = remove_outliers(train_data,at_val)
-    print("Total samples once outliers are removed: {}". format(len(data_wo_outliers.index)))
-    
-    data_one_hot_enc = pd.get_dummies(data_wo_outliers, columns=['protocol_type','service','flag', 'land', 'logged_in','is_host_login','is_guest_login'], prefix=['protocol','service','flag','land','log_in','host_login','guest_login'])
-    print(data_one_hot_enc)
-    
-
-    ##Principal component analysis PCA
-    data_pca_red = compute_pca(data_wo_outliers)
-    print('Dataframe after applying PCA: \n')
-    print(data_pca_red)
-
-    ##Pearson correlation analysis
-    corr = compute_pearson_corr(data_wo_outliers)
-    data_pearson_red = att_pearson_corr(data_wo_outliers,corr)
-    print('Dataframe after applying reduction based on Pearson coefficient: \n')
-    print(data_pearson_red)
-
-    ##Obtain all the histograms for numeric values of the attributes
-    #num_histograms(train_data)
-    
-    ##Obtain all the histograms for non numeric values of the attributes
-    #for i in poss_attr:
-    #    for j in poss_attr[i]:
-    #        print(non_num_histogram(train_data,i,j))
-
-    #att = train_data[train_data['class'] != 'normal']
-    #not_att = train_data[train_data['class'] == 'normal']
-
-    #min_at1 = min(train_data['dst_host_srv_count'])
-    #max_at1 = max(train_data['dst_host_srv_count'])
-    #bins = np.linspace(min_at1, max_at1)
-    #x1 = att['dst_host_srv_count']
-    #y1 = not_att['dst_host_srv_count']
-    
-    #fig = plt.figure()
-    #fig, (ax1, ax2, ax3) = plt.subplots(1, 3)
-    #fig.set_figheight(5)
-    #fig.set_figwidth(15)
-    #ax1.hist(x1, bins, alpha=0.5, label='attacks')
-    #ax1.hist(y1, bins, alpha=0.5, label='normal')
-    #ax1.legend(loc='upper right')
-    #ax1.set_title('dst_host_srv_count')
-    
-    #min_at2 = min(train_data['dst_host_diff_srv_rate'])
-    #max_at2 = max(train_data['dst_host_diff_srv_rate'])
-    #bins2 = np.linspace(min_at2, max_at2)
-    #x2 = att['dst_host_diff_srv_rate']
-    #y2 = not_att['dst_host_diff_srv_rate']
-    #ax2.hist(x2, bins2, alpha=0.5, label='attacks')
-    #ax2.hist(y2, bins2, alpha=0.5, label='normal')
-    #ax2.legend(loc='upper right')
-    #ax2.set_title('dst_host_diff_srv_rate')
-
-    #min_at3 = min(train_data['srv_count'])
-    #max_at3= max(train_data['srv_count'])
-    #bins3 = np.linspace(min_at3, max_at3)
-    #x3 = att['srv_count']
-    #y3 = not_att['srv_count']
-    #ax3.hist(x3, bins3, alpha=0.5, label='attacks')
-    #ax3.hist(y3, bins3, alpha=0.5, label='normal')
-    #ax3.legend(loc='upper right')
-    #ax3.set_title('srv_count')
-    #fig.savefig('numeric-ex.png')
-    #plt.close()
-   
-    
-
 
