@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import copy
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
-from sklearn import tree
+
 
 
 poss_attr = {'protocol_type': ['tcp','udp', 'icmp'], 'service' : ['aol', 'auth', 'bgp', 'courier', 'csnet_ns', 'ctf', 'daytime', 'discard', 'domain', 'domain_u',
