@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import copy
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
-
+from sklearn.preprocessing import OneHotEncoder
 
 
 poss_attr = {'protocol_type': ['tcp','udp', 'icmp'], 'service' : ['aol', 'auth', 'bgp', 'courier', 'csnet_ns', 'ctf', 'daytime', 'discard', 'domain', 'domain_u',
@@ -244,27 +244,75 @@ def remove_outliers(data, at_value):
     aux_data.reset_index(drop=True, inplace=True)
 
     return aux_data
+def one_hot_encod(train_data, test_data):
+    feat_2_enc = ['protocol_type', 'service', 'flag','land', 'logged_in','is_host_login','is_guest_login']
+    aux_train = copy.deepcopy(train_data)
+    aux_test = copy.deepcopy(test_data)
+    train_subset_2_enc = aux_train.loc[:,feat_2_enc]
+    test_subset_2_enc = aux_test.loc[:,feat_2_enc]
+    aux_train.drop(columns=['protocol_type', 'service', 'flag','land', 'logged_in','is_host_login','is_guest_login'],inplace = True)
+    aux_test.drop(columns=['protocol_type', 'service', 'flag','land', 'logged_in','is_host_login','is_guest_login'],inplace = True)
 
-def compute_pca(data,data_type):
+    enc = OneHotEncoder(handle_unknown='ignore')
+    enc.fit(train_subset_2_enc.values)
+    encoded_train_data = enc.transform(train_subset_2_enc.values).toarray()
+    encoded_test_data = enc.transform(test_subset_2_enc.values).toarray()
+    #cat = [  i for x in enc.categories_ for i in x if(i!=0 and i!=1)]
+    cat = []
+    count = 0
+    for x in enc.categories_:
+        for i in x:
+            if(i != 0 and i != 1):
+                cat.append(i)
+            else:
+                if(count == 0):
+                    cat.append('land_{}'.format(i))
+                if(count == 1):
+                    cat.append('logged_in_{}'.format(i))
+                if(count == 2):
+                    cat.append('is_host_login_{}'.format(i))
+                if(count == 3):
+                    cat.append('is_guest_login_{}'.format(i))
+                count=+1
+
+    train_OneHot = pd.DataFrame(encoded_train_data, columns = cat)
+    test_OneHot = pd.DataFrame(encoded_test_data, columns = cat)
+    train_OneHot = pd.concat([train_OneHot, aux_train], axis = 1)
+    test_OneHot = pd.concat([test_OneHot, aux_test], axis = 1)
+
+    return [train_OneHot, test_OneHot]
+
+def compute_pca(train_data, test_data, data_type):
     #Here we are first applying a correspondence between the nominal values of the attribute and a number in order to apply then a PCA.
     #We need to apply this only on the attributes that are numeric so we need to select those (drop protocol, service and flag) 
-    aux_d = copy.deepcopy(data)
+    aux_train = copy.deepcopy(train_data)
+    aux_test = copy.deepcopy(test_data)
     if(data_type == 'wo_out'):
         #Comment for hot encoding
-        aux_d.drop(columns=['protocol_type', 'service', 'flag','land', 'logged_in','is_host_login','is_guest_login'],inplace = True)
-        features = list(aux_d.columns)
+        aux_train.drop(columns=['protocol_type', 'service', 'flag','land', 'logged_in','is_host_login','is_guest_login'],inplace = True)
+        aux_test.drop(columns=['protocol_type', 'service', 'flag','land', 'logged_in','is_host_login','is_guest_login'],inplace = True)
+        features_train = list(aux_train.columns)
+        features_test = list(aux_test.columns)
         #Remove'class' from features. Comment for hot encoding
-        features = features[:-1]
+        features_train = features_train[:-1]
+        features_test = features_test[:-1]
     else:
-        features = list(aux_d.columns)
-        features.remove('class')
+        features_train = list(aux_train.columns)
+        features_test = list(aux_test.columns)
+        features_train.remove('class')
+        features_test.remove('class')
 
     #Apply normalization based on standard deviation
-    x = aux_d.loc[:, features].values
+    
+    x_train = aux_train.loc[:, features_train].values
+    x_test = aux_test.loc[:,features_test].values
     
     #Extract 'class' attribute
-    y = aux_d.loc[:,['class']].values
-    x = StandardScaler().fit_transform(x)
+    y_train = aux_train.loc[:,['class']].values
+    y_test = aux_test.loc[:,['class']].values
+
+    x_train = StandardScaler().fit_transform(x_train)
+    x_test = StandardScaler().fit_transform(x_test)
     
     #Select the number of components.
     #To select the number of components we will apply PCA for different number of components and will see the variance explained for each
@@ -295,24 +343,31 @@ def compute_pca(data,data_type):
 
     ##Apply PCA
     pca = PCA(n_components=0.95) #Here we esablish that we want an explained variance ratio above 95%
-    principalComponents = pca.fit_transform(x)
-    print('Total variance explained {}'.format(round(sum(list(pca.explained_variance_ratio_))*100, 2)))
+    principalComponents_train = pca.fit_transform(x_train)
+    principalComponents_test = pca.transform(x_test)
+    print('Total variance explained after applying PCA for {} is {}'.format(data_type,round(sum(list(pca.explained_variance_ratio_))*100, 2)))
     print('Number of components used to achieve this {}'.format(pca.n_components_))
     col = ['component {}'.format(i) for i in np.arange(1,(pca.n_components_ +1))]
-    principalDf = pd.DataFrame(data = principalComponents, columns = col)
+
+    principalDf_train = pd.DataFrame(data = principalComponents_train, columns = col)
+    
+    principalDf_test = pd.DataFrame(data = principalComponents_test, columns = col)
     
     if(data_type == 'wo_out'):
         #Comment the following for hot encoding
-        finalDf = pd.concat([data['protocol_type'],data['service'],data['flag'],data['land'],data['logged_in'],data['is_host_login'],
-                data['is_guest_login'],principalDf, aux_d['class']], axis = 1)
+        finalDf_train = pd.concat([train_data['protocol_type'],train_data['service'],train_data['flag'],train_data['land'],train_data['logged_in'],
+                train_data['is_host_login'], train_data['is_guest_login'],principalDf_train, aux_train['class']], axis = 1)
+        finalDf_test= pd.concat([test_data['protocol_type'],test_data['service'],test_data['flag'],test_data['land'],test_data['logged_in'],
+                test_data['is_host_login'], test_data['is_guest_login'],principalDf_test, aux_test['class']], axis = 1)
     else:
-        finalDf = pd.concat([principalDf, aux_d['class']], axis = 1)
+        finalDf_train = pd.concat([principalDf_train, aux_train['class']], axis = 1)
+        finalDf_test = pd.concat([principalDf_test, aux_test['class']], axis = 1)
 
-    return finalDf
+    return [finalDf_train, finalDf_test]
 
 
 
-def compute_pearson_corr(data,data_type):
+def compute_pearson_corr(data, data_type):
     #We need to apply this only on the attributes that are numeric so we need to select those (drop protocol, service and flag) 
     #We will return the correlation matrix
     dat = copy.deepcopy(data)
@@ -343,10 +398,11 @@ def compute_pearson_corr(data,data_type):
     
     return c
 
-def att_pearson_corr(data, cor,data_type):
+def att_pearson_corr(train_data, test_data, cor, data_type):
     #First we need to establish a threshold 
     #If the Pearson coefficient between two attributes if above this threshold we will remove one as we will consider that it's enough information in one
-    aux_d = copy.deepcopy(data)
+    aux_train = copy.deepcopy(train_data)
+    aux_test = copy.deepcopy(test_data)
     threshold = 0.7
     #Create a list to store a bool value that will say if the value we are studying is above the threshold:
     colum = np.full((cor.shape[0],), True, dtype=bool)
@@ -357,14 +413,18 @@ def att_pearson_corr(data, cor,data_type):
                 colum[j] = False
     #In column we have set to false the columns that we are not going to keep as they have a pearson coefficient above the threshold
     selected_columns = cor.columns[colum]
-    aux_d = aux_d[selected_columns]
+    aux_train = aux_train[selected_columns]
+    aux_test = aux_test[selected_columns]
     if(data_type == 'wo_out'):
-        aux_d = pd.concat([data['protocol_type'],data['service'],data['flag'],data['land'],data['logged_in'],data['is_host_login'],
-                data['is_guest_login'],aux_d], axis = 1)
-        aux_d = pd.concat([aux_d, data['class']], axis = 1)
+        aux_train = pd.concat([train_data['protocol_type'],train_data['service'],train_data['flag'],train_data['land'],train_data['logged_in'],
+                train_data['is_host_login'], train_data['is_guest_login'], aux_train, train_data['class'] ], axis = 1)
+        aux_test = pd.concat([test_data['protocol_type'],test_data['service'],test_data['flag'],test_data['land'],test_data['logged_in'],
+                test_data['is_host_login'], test_data['is_guest_login'], aux_test, test_data['class'] ], axis = 1)
+        
     else:
-        aux_d = pd.concat([aux_d, data['class']], axis = 1)
-    return aux_d
+        aux_train = pd.concat([aux_train, train_data['class']], axis = 1)
+        aux_test = pd.concat([aux_test, test_data['class']], axis = 1)
+    return [aux_train, aux_test]
 
         
 

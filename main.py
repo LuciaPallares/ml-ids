@@ -1,6 +1,7 @@
 from dataset import *
 from datetime import datetime
 from algorithms import *
+from sklearn import metrics
 
 
 
@@ -12,6 +13,7 @@ def main():
 
     print('-----------------------------------------------------------------------')
     train_data = pd.read_csv("data/KDDTrain+.txt")
+    test_data = pd.read_csv("data/KDDTest+.txt")
     
     train_data.columns = ['duration','protocol_type','service','flag','src_bytes','dst_bytes','land',
     'wrong_fragment','urgent','hot','num_failed_logins','logged_in','num_compromised','root_shell','su_attempted',
@@ -20,11 +22,23 @@ def main():
     'dst_host_count','dst_host_srv_count','dst_host_same_srv_rate','dst_host_diff_srv_rate','dst_host_same_src_port_rate',
     'dst_host_srv_diff_host_rate','dst_host_serror_rate','dst_host_srv_serror_rate','dst_host_rerror_rate','dst_host_srv_rerror_rate','class','?']
     
+    test_data.columns = ['duration','protocol_type','service','flag','src_bytes','dst_bytes','land',
+    'wrong_fragment','urgent','hot','num_failed_logins','logged_in','num_compromised','root_shell','su_attempted',
+    'num_root','num_file_creations','num_shells','num_access_files','num_outbound_cmds','is_host_login','is_guest_login','count',
+    'srv_count','serror_rate','srv_serror_rate','rerror_rate','srv_rerror_rate','same_srv_rate','diff_srv_rate','srv_diff_host_rate',
+    'dst_host_count','dst_host_srv_count','dst_host_same_srv_rate','dst_host_diff_srv_rate','dst_host_same_src_port_rate',
+    'dst_host_srv_diff_host_rate','dst_host_serror_rate','dst_host_srv_serror_rate','dst_host_rerror_rate','dst_host_srv_rerror_rate','class','?']
+
     train_data.drop(columns=['?'], inplace=True)
+    test_data.drop(columns=['?'], inplace=True)
 
+    print('-----------------------------------------------------------------------')
+    print('\n\n PREPARING DATA \n\n')
+    print('-----------------------------------------------------------------------')
     ##Compute the number of samples that represent attacks, the number of samples that are legitimate traffic, and how many samples are for each type of attack
+    print('\n\n ----------------- INFORMATION ABOUT THE DATA -----------------\n\n')
     calculate_totals(train_data)
-
+    
     #f = open("stats/stats4nsl.txt", "w")
     
     #protocol_type = compare_att_2_type(train_data,'protocol_type')
@@ -53,41 +67,89 @@ def main():
     #print("--------------------------------------------")
     #f.close()
 
+    print('\n\n ----------------- REMOVING BIASED DATA -----------------\n\n')
 
     ##Get the number of outliers; atributes that for a value are all atacks or all normal
-    outl, at_val = get_outliers(train_data)
-    p_outl = round((outl/len(train_data.index))*100,3)
-    print("Percentage of outliers over the total of samples: {}".format(p_outl), "%")
+    train_outl, train_at_val = get_outliers(train_data)
+    train_p_outl = round((train_outl/len(train_data.index))*100,3)
+    print("Percentage of outliers over the total of samples on the train set: {}".format(train_p_outl), "%")
+    test_outl, test_at_val = get_outliers(test_data)
+    test_p_outl = round((test_outl/len(train_data.index))*100,3)
+    print("Percentage of outliers over the total of samples on the test set: {}".format(test_p_outl), "%")
     
     ##Remove the outliers obtained in the list at_val
-    data_wo_outliers = remove_outliers(train_data,at_val)
-    print("Total samples once outliers are removed: {}". format(len(data_wo_outliers.index)))
-    print(data_wo_outliers)
-    data_one_hot_enc = pd.get_dummies(data_wo_outliers, columns=['protocol_type','service','flag', 'land', 'logged_in','is_host_login','is_guest_login'], prefix=['protocol','service','flag','land','log_in','host_login','guest_login'])
-    #print(data_one_hot_enc)
+    train_data_wo_outliers = remove_outliers(train_data,train_at_val)
+    print("Total samples once outliers are removed: {}". format(len(train_data_wo_outliers.index)))
+    print('Biased samples removed ---> RESULT: train_data_wo_outliers')
+
+    test_data_wo_outliers = remove_outliers(test_data,test_at_val)
+    print("Total samples once outliers are removed: {}". format(len(test_data_wo_outliers.index)))
+    print('Biased samples removed ---> RESULT: test_data_wo_outliers')
     
+    print('\n\n ----------------- PERFORMING ONE HOT ENCODING -----------------\n\n')
+    
+    
+    #train_data_one_hot_enc = pd.get_dummies(train_data_wo_outliers, columns=['protocol_type','service','flag', 'land', 'logged_in','is_host_login','is_guest_login'], prefix=['protocol','service','flag','land','log_in','host_login','guest_login'])
+    #test_data_one_hot_enc = pd.get_dummies(test_data_wo_outliers, columns=['protocol_type','service','flag', 'land', 'logged_in','is_host_login','is_guest_login'], prefix=['protocol','service','flag','land','log_in','host_login','guest_login'])
+    [train_data_one_hot_enc, test_data_one_hot_enc] = one_hot_encod(train_data_wo_outliers, test_data_wo_outliers)
+    print('One hot encoded performed on train_data_wo_outliers ---> RESULT: train_data_one_hot_enc')
+    print('One hot encoded performed on test_data_wo_outliers ---> RESULT: test_data_one_hot_enc')
+
+
+    print('\n\n ----------------- PERFORMING PCA -----------------\n\n')
+
     ##Principal component analysis PCA
-    #Data types : wo_out -> Data without outliers (data_wo_outliers); hot_enc -> Hot encoding applied (data_one_hot_enc)
-    data_pca_wo_out = compute_pca(data_wo_outliers,'wo_out')
-    data_pca_one_hot = compute_pca(data_one_hot_enc,'hot_enc')
-    print('Dataframe data_pca_wo_out after applying PCA: \n')
-    print(data_pca_wo_out)
-    print('Dataframe data_pca_one_hot after applying PCA: \n')
-    print(data_pca_one_hot)
+    #Data types : wo_out -> Data without outliers (train_data_wo_outliers); hot_enc -> Hot encoding applied (train_data_one_hot_enc)
+    
+    [train_data_pca_wo_out, test_data_pca_wo_out] = compute_pca(train_data_wo_outliers,test_data_wo_outliers,'wo_out')
+    
+    print('Reduction based on PCA to train_data_wo_outliers applied ---> RESULT: train_data_pca_wo_out')
+    print('Reduction based on PCA to test_data_wo_outliers applied ---> RESULT: test_data_pca_wo_out')
 
+    #print(train_data_pca_wo_out)
+    [train_data_pca_one_hot, test_data_pca_one_hot] = compute_pca(train_data_one_hot_enc,test_data_one_hot_enc,'hot_enc')
+     
+    print('Reduction based on PCA to train_data_one_hot_enc applied ---> RESULT: train_data_pca_one_hot')
+    print('Reduction based on PCA to test_data_one_hot_enc applied ---> RESULT: test_data_pca_one_hot')
+    #print(train_data_pca_one_hot)
+
+    print('\n\n ----------------- PERFORMING REDUCTION BASED ON PEARSON CORRELATION  -----------------\n\n')
+    
     ##Pearson correlation analysis
-    corr_wo_out = compute_pearson_corr(data_wo_outliers, 'wo_out')
-    corr_one_hot = compute_pearson_corr(data_one_hot_enc, 'hot_enc')
+    corr_wo_out = compute_pearson_corr(train_data_wo_outliers, 'wo_out')
+    corr_one_hot = compute_pearson_corr(train_data_one_hot_enc, 'hot_enc')
 
-    data_pears_wo_out = att_pearson_corr(data_wo_outliers,corr_wo_out,'wo_out')
-    data_pears_one_hot = att_pearson_corr(data_one_hot_enc,corr_one_hot,'hot_enc')
-    print('Dataframe data_pears_wo_out after applying reduction based on Pearson coefficient: \n')
-    print(data_pears_wo_out)
-    print('Dataframe data_pears_one_hot after applying reduction based on Pearson coefficient: \n')
-    print(data_pears_one_hot)
+    [train_data_pears_wo_out, test_data_pears_wo_out] = att_pearson_corr(train_data_wo_outliers,test_data_wo_outliers, corr_wo_out,'wo_out')
+    [train_data_pears_one_hot, test_data_pears_one_hot] = att_pearson_corr(train_data_one_hot_enc,test_data_one_hot_enc, corr_one_hot,'hot_enc')
+    
+    print('Reduction based on Pearson coefficient to train_data_wo_out applied ---> RESULT: train_data_pears_wo_out')
+    print('Reduction based on Pearson coefficient to test_data_wo_out applied ---> RESULT: test_data_pears_wo_out')
+    #print(train_data_pears_wo_out)
+    print('Reduction based on Pearson coefficient to train_data_one_hot_enc applied ---> RESULT: train_data_pears_one_hot')
+    print('Reduction based on Pearson coefficient to test_data_one_hot_enc applied ---> RESULT: test_data_pears_one_hot')
+    #print(train_data_pears_one_hot)
 
+    print('-----------------------------------------------------------------------')
+    print('\n\n APPLYING TRAINING ALGORITHMS \n\n')
+    print('-----------------------------------------------------------------------')
 
-
+    #We will select 3 datasets from the 5 available:
+    #Choose between: train_data_wo_outliers, train_data_pca_wo_out, train_data_pca_one_hot, train_data_pears_wo_out, train_data_pears_one_hot
+    #print('\n\n ----------------- DECISION TREE  -----------------\n\n')
+    #dt_params = params_4_dec_tree(train_data_pca_one_hot)
+    #[pred_pca_one_hot_dec_tree,true_pca_one_hot] = apply_decision_tree(dt_params, train_data_pca_one_hot, test_data_pca_one_hot)
+    #print("Accuracy achieved applying decision tree to data_pca_one_hot: ", metrics.accuracy_score(true_pca_one_hot, pred_pca_one_hot_dec_tree))
+    #print("\n")
+    #dt_params = params_4_dec_tree(train_data_pears_one_hot)
+    #[pred_pears_one_hot_dec_tree,true_pears_one_hot_dec_tree] = apply_decision_tree(dt_params, train_data_pears_one_hot, test_data_pears_one_hot)
+    #print("Accuracy achieved applying decision tree to data_pears_one_hot: ", metrics.accuracy_score(true_pears_one_hot_dec_tree, pred_pears_one_hot_dec_tree))
+    
+    print('\n\n ----------------- SVM  -----------------\n\n')
+    
+    svm_params = params_4_svm(train_data_pears_one_hot)
+    [pred_pears_one_hot_svm,true_pears_svm] = apply_svm(svm_params, train_data_pears_one_hot, test_data_pears_one_hot)
+    print("Accuracy achieved applying SVM to data_pears_one_hot: ", metrics.accuracy_score(true_pears_svm, pred_pears_one_hot_svm))
+    
     ##Obtain all the histograms for numeric values of the attributes
     #num_histograms(train_data)
     
