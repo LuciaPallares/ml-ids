@@ -142,13 +142,14 @@ def main():
     #print("\n")
     #dt_params = params_4_dec_tree(train_data_pears_one_hot)
     #[pred_pears_one_hot_dec_tree,true_pears_one_hot_dec_tree] = apply_decision_tree(dt_params, train_data_pears_one_hot, test_data_pears_one_hot)
-    #print("Accuracy achieved applying decision tree to data_pears_one_hot: ", metrics.accuracy_score(true_pears_one_hot_dec_tree, pred_pears_one_hot_dec_tree))
+    #print("Accuracy achieved applying decision tree to data_pears_one_hot: ", (metrics.accuracy_score(true_pears_one_hot_dec_tree, pred_pears_one_hot_dec_tree))*100)
     
     print('\n\n ----------------- SVM  -----------------\n\n')
     
-    svm_params = params_4_svm(train_data_pears_one_hot)
+    #svm_params = params_4_svm(train_data_pears_one_hot)
+    svm_params = {'C': 7.1, 'kernel' : 'rbf', 'degree': 3, 'gamma' : 'auto' }
     [pred_pears_one_hot_svm,true_pears_svm] = apply_svm(svm_params, train_data_pears_one_hot, test_data_pears_one_hot)
-    print("Accuracy achieved applying SVM to data_pears_one_hot: ", metrics.accuracy_score(true_pears_svm, pred_pears_one_hot_svm))
+    print("Accuracy achieved applying SVM to data_pears_one_hot: ", (metrics.accuracy_score(true_pears_svm, pred_pears_one_hot_svm))*100)
     
     ##Obtain all the histograms for numeric values of the attributes
     #num_histograms(train_data)
