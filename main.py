@@ -135,21 +135,61 @@ def main():
 
     #We will select 3 datasets from the 5 available:
     #Choose between: train_data_wo_outliers, train_data_pca_wo_out, train_data_pca_one_hot, train_data_pears_wo_out, train_data_pears_one_hot
-    #print('\n\n ----------------- DECISION TREE  -----------------\n\n')
-    #dt_params = params_4_dec_tree(train_data_pca_one_hot)
-    #[pred_pca_one_hot_dec_tree,true_pca_one_hot] = apply_decision_tree(dt_params, train_data_pca_one_hot, test_data_pca_one_hot)
-    #print("Accuracy achieved applying decision tree to data_pca_one_hot: ", metrics.accuracy_score(true_pca_one_hot, pred_pca_one_hot_dec_tree))
-    #print("\n")
-    #dt_params = params_4_dec_tree(train_data_pears_one_hot)
-    #[pred_pears_one_hot_dec_tree,true_pears_one_hot_dec_tree] = apply_decision_tree(dt_params, train_data_pears_one_hot, test_data_pears_one_hot)
-    #print("Accuracy achieved applying decision tree to data_pears_one_hot: ", (metrics.accuracy_score(true_pears_one_hot_dec_tree, pred_pears_one_hot_dec_tree))*100)
+    
+    print('\n\n ----------------- DECISION TREE  -----------------\n\n')
+    
+    #dt_params_pca_one_hot = params_4_dec_tree(train_data_pca_one_hot)
+    #[pred_pca_one_hot_dec_tree,true_pca_one_hot] = apply_decision_tree(dt_params_pca_one_hot, train_data_pca_one_hot, test_data_pca_one_hot)
+    #print("Accuracy achieved applying decision tree to data_pca_one_hot: ", (metrics.accuracy_score(true_pca_one_hot, pred_pca_one_hot_dec_tree))*100)
+    #dt_params_pca_wo_out = params_4_dec_tree(train_data_pca_wo_out)
+    #[pred_pca_wo_out_dec_tree,true_pca_wo_out] = apply_decision_tree(dt_params_pca_wo_out, train_data_pca_wo_out, test_data_pca_wo_out)
+    #print("Accuracy achieved applying decision tree to data_pca_wo_out: ", (metrics.accuracy_score(true_pca_wo_out, pred_pca_wo_out_dec_tree))*100)
+    #dt_params_pears_one_hot = params_4_dec_tree(train_data_pears_one_hot)
+    #[pred_pears_one_hot_dec_tree,true_pears_one_hot] = apply_decision_tree(dt_params_pears_one_hot, train_data_pears_one_hot, test_data_pears_one_hot)
+    #print("Accuracy achieved applying decision tree to data_pears_one_hot: ", (metrics.accuracy_score(true_pears_one_hot, pred_pears_one_hot_dec_tree))*100)
+    #[pred_pears_wo_out_dec_tree,true_pears_wo_out] = apply_decision_tree(dt_params_pears_wo_out, train_data_pears_wo_out, test_data_pears_wo_out)
+    #print("Accuracy achieved applying decision tree to data_pears_wo_out: ", (metrics.accuracy_score(true_pears_wo_out, pred_pears_wo_out_dec_tree))*100)
+    
     
     print('\n\n ----------------- SVM  -----------------\n\n')
     
-    #svm_params = params_4_svm(train_data_pears_one_hot)
-    svm_params = {'C': 7.1, 'kernel' : 'rbf', 'degree': 3, 'gamma' : 'auto' }
-    [pred_pears_one_hot_svm,true_pears_svm] = apply_svm(svm_params, train_data_pears_one_hot, test_data_pears_one_hot)
-    print("Accuracy achieved applying SVM to data_pears_one_hot: ", (metrics.accuracy_score(true_pears_svm, pred_pears_one_hot_svm))*100)
+    svm_params_pca_one_hot = params_4_svm(train_data_pca_one_hot)
+    [pred_pca_one_hot_svm,true_pca_one_hot_svm] = apply_svm(svm_params_pca_one_hot, train_data_pca_one_hot, test_data_pca_one_hot)
+    print("Accuracy achieved applying SVM to data_pca_one_hot: ", (metrics.accuracy_score(true_pca_one_hot_svm, pred_pca_one_hot_svm))*100)
+    svm_params_pca_wo_out = params_4_svm(train_data_pca_wo_out)
+    [pred_pca_wo_out_svm,true_pca_wo_out_svm] = apply_svm(svm_params_pca_wo_out, train_data_pca_wo_out, test_data_pca_wo_out)
+    print("Accuracy achieved applying SVM to data_pca_wo_out: ", (metrics.accuracy_score(true_pca_wo_out_svm, pred_pca_wo_out_svm))*100)
+    svm_params_pears_one_hot = params_4_svm(train_data_pears_one_hot)
+    [pred_pears_one_hot_svm,true_pears_one_hot_svm] = apply_svm(svm_params_pears_one_hot, train_data_pears_one_hot, test_data_pears_one_hot)
+    print("Accuracy achieved applying SVM to data_pears_one_hot: ", (metrics.accuracy_score(true_pears_one_hot_svm, pred_pears_one_hot_svm))*100)
+    svm_params_pears_wo_out = params_4_svm(train_data_pears_wo_out)
+    [pred_pears_wo_out_svm,true_pears_wo_out_svm] = apply_svm(svm_params_pears_wo_out, train_data_pears_wo_out, test_data_pears_wo_out)
+    print("Accuracy achieved applying SVM to data_pears_wo_out: ", (metrics.accuracy_score(true_pears_wo_out_svm, pred_pears_wo_out_svm))*100)
+
+
+    print('\n\n ----------------- RANDOM FOREST  -----------------\n\n')
+
+    #rf_params_pca_one_hot = params_4_random_forest(train_data_pca_one_hot)
+    #[pred_pca_one_hot_rf,true_pca_rf] = apply_random_forest(rf_params_pca_one_hot, train_data_pca_one_hot, test_data_pca_one_hot)
+    #print("Accuracy achieved applying random forest to data_pca_one_hot: ", (metrics.accuracy_score(true_pca_rf, pred_pca_one_hot_rf))*100)
+    #rf_params_pca_wo_out = params_4_random_forest(train_data_pca_wo_out)
+    #[pred_pca_wo_rf,true_pca_wo_rf] = apply_random_forest(rf_params_pca_wo_out, train_data_pca_wo_out, test_data_pca_wo_out)
+    #print("Accuracy achieved applying random forest to data_pca_wo_out: ", (metrics.accuracy_score(true_pca_wo_rf, pred_pca_wo_rf))*100)
+    #rf_params_pears_one_hot = params_4_random_forest(train_data_pears_one_hot)
+    ##rf_params = {'n_estimators': 166, 'criterion': 'gini'}
+    #[pred_pears_one_hot_rf,true_pears_rf] = apply_random_forest(rf_params_pears_one_hot, train_data_pears_one_hot, test_data_pears_one_hot)
+    #print("Accuracy achieved applying random forest to data_pears_one_hot: ", (metrics.accuracy_score(true_pears_rf, pred_pears_one_hot_rf))*100)
+    #rf_params_pears_wo_out = params_4_random_forest(train_data_pears_wo_out)
+    #[pred_pears_wo_out_rf,true_pears_wo_rf] = apply_random_forest(rf_params_pears_wo_out, train_data_pears_wo_out, test_data_pears_wo_out)
+    #print("Accuracy achieved applying random forest to data_pears_wo_out: ", (metrics.accuracy_score(true_pears_wo_rf, pred_pears_wo_out_rf))*100)
+    
+    
+    
+    
+    
+    
+    
+    
     
     ##Obtain all the histograms for numeric values of the attributes
     #num_histograms(train_data)

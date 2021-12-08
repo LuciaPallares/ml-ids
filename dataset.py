@@ -311,8 +311,9 @@ def compute_pca(train_data, test_data, data_type):
     y_train = aux_train.loc[:,['class']].values
     y_test = aux_test.loc[:,['class']].values
 
-    x_train = StandardScaler().fit_transform(x_train)
-    x_test = StandardScaler().fit_transform(x_test)
+    scaler = StandardScaler().fit(x_train)
+    x_train = scaler.transform(x_train)
+    x_test = scaler.transform(x_test)
     
     #Select the number of components.
     #To select the number of components we will apply PCA for different number of components and will see the variance explained for each
@@ -354,11 +355,12 @@ def compute_pca(train_data, test_data, data_type):
     principalDf_test = pd.DataFrame(data = principalComponents_test, columns = col)
     
     if(data_type == 'wo_out'):
-        #Comment the following for hot encoding
-        finalDf_train = pd.concat([train_data['protocol_type'],train_data['service'],train_data['flag'],train_data['land'],train_data['logged_in'],
-                train_data['is_host_login'], train_data['is_guest_login'],principalDf_train, aux_train['class']], axis = 1)
-        finalDf_test= pd.concat([test_data['protocol_type'],test_data['service'],test_data['flag'],test_data['land'],test_data['logged_in'],
-                test_data['is_host_login'], test_data['is_guest_login'],principalDf_test, aux_test['class']], axis = 1)
+        finalDf_train = pd.concat([principalDf_train, aux_train['class']], axis = 1)
+        finalDf_test = pd.concat([principalDf_test, aux_test['class']], axis = 1)
+        #finalDf_train = pd.concat([train_data['protocol_type'],train_data['service'],train_data['flag'],train_data['land'],train_data['logged_in'],
+        #        train_data['is_host_login'], train_data['is_guest_login'],principalDf_train, aux_train['class']], axis = 1)
+        #finalDf_test = pd.concat([test_data['protocol_type'],test_data['service'],test_data['flag'],test_data['land'],test_data['logged_in'],
+        #        test_data['is_host_login'], test_data['is_guest_login'],principalDf_test, aux_test['class']], axis = 1)
     else:
         finalDf_train = pd.concat([principalDf_train, aux_train['class']], axis = 1)
         finalDf_test = pd.concat([principalDf_test, aux_test['class']], axis = 1)
@@ -416,10 +418,12 @@ def att_pearson_corr(train_data, test_data, cor, data_type):
     aux_train = aux_train[selected_columns]
     aux_test = aux_test[selected_columns]
     if(data_type == 'wo_out'):
-        aux_train = pd.concat([train_data['protocol_type'],train_data['service'],train_data['flag'],train_data['land'],train_data['logged_in'],
-                train_data['is_host_login'], train_data['is_guest_login'], aux_train, train_data['class'] ], axis = 1)
-        aux_test = pd.concat([test_data['protocol_type'],test_data['service'],test_data['flag'],test_data['land'],test_data['logged_in'],
-                test_data['is_host_login'], test_data['is_guest_login'], aux_test, test_data['class'] ], axis = 1)
+        aux_train = pd.concat([aux_train, train_data['class']], axis = 1)
+        aux_test = pd.concat([aux_test, test_data['class']], axis = 1)
+        #aux_train = pd.concat([train_data['protocol_type'],train_data['service'],train_data['flag'],train_data['land'],train_data['logged_in'],
+        #        train_data['is_host_login'], train_data['is_guest_login'], aux_train, train_data['class'] ], axis = 1)
+        #aux_test = pd.concat([test_data['protocol_type'],test_data['service'],test_data['flag'],test_data['land'],test_data['logged_in'],
+        #        test_data['is_host_login'], test_data['is_guest_login'], aux_test, test_data['class'] ], axis = 1)
         
     else:
         aux_train = pd.concat([aux_train, train_data['class']], axis = 1)
