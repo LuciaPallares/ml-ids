@@ -3,12 +3,24 @@ from sklearn.model_selection import RandomizedSearchCV
 from sklearn.svm import SVC 
 from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestClassifier
+from sklearn import metrics
 import numpy as np
+import matplotlib.pyplot as plt
 
-def evaluate_results(y_pred, y_test):
 
+def evaluate_results(y_pred, y_test, estim):
+    acc = metrics.accuracy_score(y_test, y_pred)*100
+    c = metrics.confusion_matrix(y_test,y_pred)
+    #cm = metrics.confusion_matrix(y_test, y_pred, labels=estim.classes_)
+    fig = plt.figure()
+    plt.matshow(c)
+    plt.title('Confusion matrix')
+    plt.colorbar()
+    plt.ylabel('True Label')
+    plt.xlabel('Predicated Label')
+    plt.savefig('conf_matrix/confusion_matrix_{}.jpg'.format(estim))
 
-    return 0
+    return acc
 def params_4_dec_tree(data):
     print('SELECTING PARAMETERS FOR DECISION TREE \n')
     features = list(data.columns)
@@ -39,9 +51,8 @@ def apply_decision_tree(params, train_data, test_data):
     y_test = test_data['class']
     dt = tree.DecisionTreeClassifier(criterion=params['criterion'], max_depth=params['max_depth'], max_features=params['max_features'])
     cdt = dt.fit(X_train,y_train)
-
     y_predic = cdt.predict(X_test)
-
+    print("Accuracy achieved applying Decision Tree: ", evaluate_results(y_test, y_predic, dt))
     return [y_predic, y_test]
 def params_4_svm(data):
     print('SELECTING PARAMETERS FOR SVM \n ')
@@ -78,7 +89,7 @@ def apply_svm(params, train_data, test_data):
     svm = SVC(C=params['C'], kernel=params['kernel'], degree=params['degree'], gamma=params['gamma'], max_iter=1000)
     csvm = svm.fit(X_train,y_train)
     y_predic = csvm.predict(X_test)
-
+    print("Accuracy achieved applying SVM: ", evaluate_results(y_test, y_predic, svm))
     return [y_predic, y_test]
 
 def params_4_random_forest(data):
@@ -110,5 +121,5 @@ def apply_random_forest(params, train_data, test_data):
     rf = RandomForestClassifier(n_estimators= params['n_estimators'], criterion=params['criterion'], n_jobs=-1)
     crf = rf.fit(X_train,y_train)
     y_predic = crf.predict(X_test)
-
+    print("Accuracy achieved applying Random Forest: ", evaluate_results(y_test, y_predic, rf))
     return [y_predic, y_test]

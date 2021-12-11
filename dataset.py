@@ -414,6 +414,7 @@ def att_pearson_corr(train_data, test_data, cor, data_type):
             if cor.iloc[i,j] >= threshold and colum[j]:
                 colum[j] = False
     #In column we have set to false the columns that we are not going to keep as they have a pearson coefficient above the threshold
+    #cor is a dataframe so we select the columns that are set to true in colum so we keep only those
     selected_columns = cor.columns[colum]
     aux_train = aux_train[selected_columns]
     aux_test = aux_test[selected_columns]
