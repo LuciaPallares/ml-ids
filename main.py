@@ -206,7 +206,30 @@ def main():
     rf_params_pears_wo_out = {'n_estimators': 180, 'criterion': 'entropy'}
     [pred_pears_wo_out_rf,true_pears_wo_rf] = apply_random_forest(rf_params_pears_wo_out, train_data_pears_wo_out, test_data_pears_wo_out)
     
-    
+
+
+    print('\n\n ----------------- MLPCLASSIFIER (NEURAL NETWORK)  -----------------\n\n')
+
+    print("Dataset used: data_pca_one_hot \n")
+    #nn_params_pca_one_hot = params_4_neural_network(train_data_pca_one_hot)
+    nn_params_pca_one_hot =  {'solver': 'adam', 'momentum': 0.9, 'max_iter': 160, 'learning_rate': 'constant', 'hidden_layer_sizes': (172, 129, 86), 'batch_size': 256, 'activation': 'relu'}
+    nn_params_pca_one_hot =  {'solver': 'adam', 'momentum': 0.9, 'max_iter': 160, 'learning_rate': 'constant', 'hidden_layer_sizes': (301, 258, 215,172, 129, 86), 'batch_size': 256, 'activation': 'relu'}
+    [pred_pca_one_hot_nn,true_pca_nn] = apply_neural_network(nn_params_pca_one_hot, train_data_pca_one_hot, test_data_pca_one_hot)
+    print('-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-')
+    print("Dataset used: data_pca_wo_out \n")
+    #nn_params_pca_wo_out = params_4_neural_network(train_data_pca_wo_out)
+    nn_params_pca_wo_out = {'solver': 'adam', 'momentum': 0.9, 'max_iter': 140, 'learning_rate': 'constant', 'hidden_layer_sizes': (84, 63, 42), 'batch_size': 512, 'activation': 'tanh'}
+    [pred_pca_wo_nn,true_pca_wo_nn] = apply_neural_network(nn_params_pca_wo_out, train_data_pca_wo_out, test_data_pca_wo_out)
+    print('-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-')
+    print("Dataset used: data_pears_one_hot \n")
+    #nn_params_pears_one_hot = params_4_neural_network(train_data_pears_one_hot)
+    nn_params_pears_one_hot =  {'solver': 'adam', 'momentum': 0.7, 'max_iter': 140, 'learning_rate': 'constant', 'hidden_layer_sizes': (236, 177, 118), 'batch_size': 256, 'activation': 'logistic'}
+    [pred_pears_one_hot_nn,true_pears_nn] = apply_neural_network(nn_params_pears_one_hot, train_data_pears_one_hot, test_data_pears_one_hot)
+    print('-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-')
+    print("Dataset used: data_pears_wo_out \n")
+    #nn_params_pears_wo_out = params_4_neural_network(train_data_pears_wo_out)
+    nn_params_pears_wo_out =  {'solver': 'adam', 'momentum': 0.9, 'max_iter': 120, 'learning_rate': 'adaptive', 'hidden_layer_sizes': (75, 50), 'batch_size': 256, 'activation': 'logistic'}
+    [pred_pears_wo_out_nn,true_pears_wo_nn] = apply_neural_network(nn_params_pears_wo_out, train_data_pears_wo_out, test_data_pears_wo_out)
     
     
     
