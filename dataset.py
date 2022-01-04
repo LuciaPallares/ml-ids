@@ -128,6 +128,21 @@ def calculate_totals(train_data):
 
     fig.savefig('figures/type_attack.png')
 
+def binary_datasets(train, test):
+    bin_train = copy.deepcopy(train) 
+    bin_test = copy.deepcopy(test)
+
+    train_at = list(dict.fromkeys(bin_train['class']))
+    test_at = list(dict.fromkeys(bin_test['class']))
+    train_at.remove('normal')
+    test_at.remove('normal')
+    len_tr = len(train_at)
+    len_te = len(test_at)
+    
+    bin_train['class'] = bin_train['class'].replace(train_at,'attack')
+    bin_test['class'] = bin_test['class'].replace(test_at,'attack')
+
+    return bin_train, bin_test
 def compare_att_2_type(pd, attribute):
     #Compare the attributes to the type of data (normal/attack)
     #Receives the attribute that wants to be studied

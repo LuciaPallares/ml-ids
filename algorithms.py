@@ -11,18 +11,27 @@ import matplotlib.pyplot as plt
 
 def evaluate_results(y_pred, y_test, estim):
     acc = metrics.accuracy_score(y_test, y_pred)*100
-    f1 = metrics.f1_score(y_test, y_pred)*100
-    c = metrics.confusion_matrix(y_test,y_pred)
+    
+    if('attack' in list(y_pred)): #Binary classification
+        print("BINARY CLASSIFICATION")
+        f1 = metrics.f1_score(list(y_test), list(y_pred),pos_label='normal')*100
+        #f1 = metrics.f1_score(y_test, y_pred)*100
+    else:
+        print("MULTILABEL CLASSIFICATION")
+        f1 = metrics.f1_score(y_test, y_pred, average='micro',labels=['back','buffer_overflow','ftp_write','guess_passwd','imap','ipsweep','land',
+            'loadmodule','multihop','neptune','nmap','perl','phf','pod','portsweep','rootkit','satan','smurf','spy','teardrop','warezclient','warezmaster'])*100
+    #c = metrics.confusion_matrix(y_test,y_pred)
     #cm = metrics.confusion_matrix(y_test, y_pred, labels=estim.classes_)
-    fig = plt.figure()
-    plt.matshow(c)
-    plt.title('Confusion matrix')
-    plt.colorbar()
-    plt.ylabel('True Label')
-    plt.xlabel('Predicated Label')
-    plt.savefig('conf_matrix/confusion_matrix_{}.jpg'.format(estim))
+    #fig = plt.figure()
+    #plt.matshow(c)
+    #plt.title('Confusion matrix')
+    #plt.colorbar()
+    #plt.ylabel('True Label')
+    #plt.xlabel('Predicated Label')
+    #plt.savefig('conf_matrix/confusion_matrix_{}.jpg'.format(estim))
 
     return [acc,f1]
+
 def params_4_dec_tree(data):
     print('SELECTING PARAMETERS FOR DECISION TREE \n')
     features = list(data.columns)
@@ -33,8 +42,9 @@ def params_4_dec_tree(data):
     #Select best parameters for the decision tree
     max_feat = len(features)
     param = {'max_depth': range(3,15), 'max_features': range(1,max_feat), 'criterion':['gini','entropy']}
-    rs = RandomizedSearchCV(dt, param, n_iter=25,n_jobs=-1)
+    rs = RandomizedSearchCV(dt, param, scoring='balanced_accuracy',cv=2,n_iter=25,n_jobs=-1)
     rs.fit(X,y)
+
 
     print("Best parameters for decision tree: ", rs.best_params_)
     print("Best score for decision tree: {}".format(rs.best_score_*100))
@@ -71,11 +81,11 @@ def params_4_svm(data):
     #'precomputed'
     kernels = ['linear', 'poly', 'rbf', 'sigmoid']
     degree = [ i for i in range(3,5)]
-    gamma = ['scale','auto']
-    c = [i for i in np.arange(0.1,10,0.5)]
+    gamma = ['scale','auto', 0.001, 0.01, 0.1,]
+    c = [50, 100, 150, 200, 250]
     params = {'C': c, 'kernel' : kernels, 'degree': degree, 'gamma' : gamma }
     svm = SVC(max_iter=1000)
-    rs = RandomizedSearchCV(svm, params, n_iter=25, n_jobs=-1)
+    rs = RandomizedSearchCV(svm, params,scoring='balanced_accuracy',cv=2, n_iter=25, n_jobs=-1)
     rs.fit(X,y)
     print("Best parameters for SVM: ", rs.best_params_)
     print("Best score for SVM: {}".format(rs.best_score_*100))
@@ -110,7 +120,7 @@ def params_4_random_forest(data):
     #Select best parameters for the decision tree
     #param = {'n_estimators': range(100,200),'max_depth': range(3,15), 'max_features': range(1,max_feat), 'criterion':['gini','entropy']}
     param = {'n_estimators': range(100,200), 'criterion':['gini','entropy']}
-    rs = RandomizedSearchCV(rf, param, n_iter=30,n_jobs=-1)
+    rs = RandomizedSearchCV(rf, param,scoring='balanced_accuracy',cv=2, n_iter=30,n_jobs=-1)
     rs.fit(X,y)
 
     print("Best parameters for random forest: ", rs.best_params_)
@@ -142,17 +152,20 @@ def params_4_neural_network(data):
     X = data[features]
     y = data['class']
     num_feat = len(features)
+    size = num_feat*100
     nnc = MLPClassifier()
-    batch_size = [64, 128, 256, 512]
+    batch_size = [128, 256, 512]
     epochs = [120, 140, 160]
-    hidden_layer_sizes = [(3*num_feat, 2*num_feat,), (4*num_feat, 3*num_feat, 2*num_feat,), (6*num_feat,5*num_feat,4*num_feat, 3*num_feat, 2*num_feat,)]
+    #At the output layer there will be 22 neurons (22 possible attacks)
+    hidden_layer_sizes = [(round(num_feat*3), round(num_feat*2),), (round(num_feat*4), round(num_feat*3), round(num_feat*2),), (round(num_feat*5),round(num_feat*4),round(num_feat*3), round(num_feat*2),)]
+    #hidden_layer_sizes = [(round(size/2), round(size/3),), (round(size/2), round(size/3), round(size/4),), (round(size/2),round(size/3),round(size/4), round(size/5), round(size/6),)]
     activation = ['identity', 'logistic', 'tanh', 'relu']
     learning_rate = ['constant', 'invscaling', 'adaptive']
     solver = ['lbfgs', 'sgd', 'adam']
-    momentum = [0.7, 0.8, 0.9]
+    momentum = [0.8, 0.9]
     params = {'hidden_layer_sizes':hidden_layer_sizes, 'activation': activation, 'solver': solver, 'learning_rate':learning_rate,
                 'batch_size':batch_size,'momentum' :momentum, 'max_iter':epochs}
-    rs = RandomizedSearchCV(nnc,params,n_iter=70,n_jobs=-1)
+    rs = RandomizedSearchCV(nnc,params,scoring='balanced_accuracy',cv=2,n_iter=50,n_jobs=-1)
     rs.fit(X,y)
 
     
