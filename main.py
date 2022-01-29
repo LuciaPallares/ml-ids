@@ -172,44 +172,44 @@ def main():
     print('\n\n ----------------- DECISION TREE  -----------------\n\n')
     
     print("\nDataset used: data_pca_one_hot \n")
-    ##dt_params_pca_one_hot = params_4_dec_tree(train_data_pca_one_hot)
+    #dt_params_pca_one_hot = params_4_dec_tree(train_data_pca_one_hot)
     dt_params_pca_one_hot = {'max_features': 26, 'max_depth': 14, 'criterion': 'gini'} 
     [pred_pca_one_hot_dec_tree,true_pca_one_hot] = apply_decision_tree(dt_params_pca_one_hot, train_data_pca_one_hot, test_data_pca_one_hot)
     print('-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-')
     print("\nDataset used: data_pca_wo_out \n")
-    ##dt_params_pca_wo_out = params_4_dec_tree(train_data_pca_wo_out)
+    #dt_params_pca_wo_out = params_4_dec_tree(train_data_pca_wo_out)
     dt_params_pca_wo_out = {'max_features': 16, 'max_depth': 14, 'criterion': 'entropy'}
     [pred_pca_wo_out_dec_tree,true_pca_wo_out] = apply_decision_tree(dt_params_pca_wo_out, train_data_pca_wo_out, test_data_pca_wo_out)
     print('-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-')
     print("\nDataset used: data_pears_one_hot \n")
-    ##dt_params_pears_one_hot = params_4_dec_tree(train_data_pears_one_hot)
+    #dt_params_pears_one_hot = params_4_dec_tree(train_data_pears_one_hot)
     dt_params_pears_one_hot = {'max_features': 56, 'max_depth': 14, 'criterion': 'entropy'}
     [pred_pears_one_hot_dec_tree,true_pears_one_hot] = apply_decision_tree(dt_params_pears_one_hot, train_data_pears_one_hot, test_data_pears_one_hot)
     print('-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-')
     print("\nDataset used: data_pears_wo_out \n")
-    ##dt_params_pears_wo_out = params_4_dec_tree(train_data_pears_wo_out)
+    #dt_params_pears_wo_out = params_4_dec_tree(train_data_pears_wo_out)
     dt_params_pears_wo_out = {'max_features': 17, 'max_depth': 14, 'criterion': 'gini'}
     [pred_pears_wo_out_dec_tree,true_pears_wo_out] = apply_decision_tree(dt_params_pears_wo_out, train_data_pears_wo_out, test_data_pears_wo_out)
     print('-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-')
     print('--- BINARY CLASSIFICATION ---')
     print('-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-')
     print("\nDataset used: bin_pca_one_hot \n")
-    ##bin_dt_params_pca_one_hot = params_4_dec_tree_bin(train_bin_pca_one_hot)
+    #bin_dt_params_pca_one_hot = params_4_dec_tree_bin(train_bin_pca_one_hot)
     bin_dt_params_pca_one_hot = {'max_features': 37, 'max_depth': 17, 'criterion': 'entropy'}
     [pred_bin_pca_one_hot_dec_tree,true_bin_pca_one_hot] = apply_decision_tree(bin_dt_params_pca_one_hot, train_bin_pca_one_hot, test_bin_pca_one_hot)
     print('-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-')
     print("\nDataset used: bin_pca_wo_out \n")
-    ##bin_dt_params_pca_wo_out = params_4_dec_tree_bin(train_bin_pca_wo_out)
+    #bin_dt_params_pca_wo_out = params_4_dec_tree_bin(train_bin_pca_wo_out)
     bin_dt_params_pca_wo_out = {'max_features': 15, 'max_depth': 14, 'criterion': 'entropy'}
     [pred_bin_pca_wo_out_dec_tree,true_bin_pca_wo_out] = apply_decision_tree(bin_dt_params_pca_wo_out, train_bin_pca_wo_out, test_bin_pca_wo_out)
     print('-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-')
     print("\nDataset used: bin_pears_one_hot \n")
-    ##bin_dt_params_pears_one_hot = params_4_dec_tree_bin(train_bin_pears_one_hot)
+    #bin_dt_params_pears_one_hot = params_4_dec_tree_bin(train_bin_pears_one_hot)
     bin_dt_params_pears_one_hot = {'max_features': 50, 'max_depth': 14, 'criterion': 'entropy'}
     [pred_bin_pears_one_hot_dec_tree,true_bin_pears_one_hot] = apply_decision_tree(bin_dt_params_pears_one_hot, train_bin_pears_one_hot, test_bin_pears_one_hot)
     print('-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-')
     print("\nDataset used: bin_pears_wo_out \n")
-    ##bin_dt_params_pears_wo_out = params_4_dec_tree_bin(train_bin_pears_wo_out)
+    #bin_dt_params_pears_wo_out = params_4_dec_tree_bin(train_bin_pears_wo_out)
     bin_dt_params_pears_wo_out = {'max_features': 17, 'max_depth': 19, 'criterion': 'entropy'}
     [pred_bin_pears_wo_out_dec_tree,true_bin_pears_wo_out] = apply_decision_tree(bin_dt_params_pears_wo_out, train_bin_pears_wo_out, test_bin_pears_wo_out)
     
@@ -217,45 +217,45 @@ def main():
     print('\n\n ----------------- SVM  -----------------\n\n')
     
     print("\nDataset used: data_pca_one_hot \n")
-    ##svm_params_pca_one_hot = params_4_svm(train_data_pca_one_hot)
+    #svm_params_pca_one_hot = params_4_svm(train_data_pca_one_hot)
     svm_params_pca_one_hot = {'kernel': 'rbf', 'gamma': 0.001, 'degree': 4, 'C': 250}
     [pred_pca_one_hot_svm,true_pca_one_hot_svm] = apply_svm(svm_params_pca_one_hot, train_data_pca_one_hot, test_data_pca_one_hot)
     print('-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-')
     print("\nDataset used: data_pca_wo_out \n")
-    ##svm_params_pca_wo_out = params_4_svm(train_data_pca_wo_out)
+    #svm_params_pca_wo_out = params_4_svm(train_data_pca_wo_out)
     svm_params_pca_wo_out = {'kernel': 'rbf', 'gamma': 0.01, 'degree': 4, 'C': 50}
     [pred_pca_wo_out_svm,true_pca_wo_out_svm] = apply_svm(svm_params_pca_wo_out, train_data_pca_wo_out, test_data_pca_wo_out)
     print('-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-')
     print("\nDataset used: data_pears_one_hot \n")
-    ##svm_params_pears_one_hot = params_4_svm(train_data_pears_one_hot)
+    #svm_params_pears_one_hot = params_4_svm(train_data_pears_one_hot)
     svm_params_pears_one_hot =  {'kernel': 'rbf', 'gamma': 0.001, 'degree': 3, 'C': 200}
     [pred_pears_one_hot_svm,true_pears_one_hot_svm] = apply_svm(svm_params_pears_one_hot, train_data_pears_one_hot, test_data_pears_one_hot)
     print('-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-')
     print("\nDataset used: data_pears_wo_out \n")
-    ##svm_params_pears_wo_out = params_4_svm(train_data_pears_wo_out)
+    #svm_params_pears_wo_out = params_4_svm(train_data_pears_wo_out)
     svm_params_pears_wo_out = {'kernel': 'rbf', 'gamma': 0.001, 'degree': 3, 'C': 250}
     [pred_pears_wo_out_svm,true_pears_wo_out_svm] = apply_svm(svm_params_pears_wo_out, train_data_pears_wo_out, test_data_pears_wo_out)
     print('-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-')
     print('--- BINARY CLASSIFICATION ---')
     print('-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-')
     print("\nDataset used: bin_train_pca_one_hot \n")
-    ##bin_svm_params_pca_one_hot = params_4_svm_bin(train_bin_pca_one_hot)
+    #bin_svm_params_pca_one_hot = params_4_svm_bin(train_bin_pca_one_hot)
     bin_svm_params_pca_one_hot = {'kernel': 'rbf', 'gamma': 'auto', 'degree': 3, 'C': 100}
     [pred_bin_pca_one_hot_svm,true_bin_pca_one_hot_svm] = apply_svm(bin_svm_params_pca_one_hot, train_bin_pca_one_hot, test_bin_pca_one_hot)
     print('-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-')
     print("\nDataset used: bin_train_pca_wo_out \n")
-    ##bin_svm_params_pca_wo_out = params_4_svm_bin(train_bin_pca_one_hot)
+    #bin_svm_params_pca_wo_out = params_4_svm_bin(train_bin_pca_one_hot)
     bin_svm_params_pca_wo_out = {'kernel': 'rbf', 'gamma': 'scale', 'degree': 2, 'C': 50}
     [pred_bin_pca_wo_out_svm,true_bin_pca_wo_out_svm] = apply_svm(bin_svm_params_pca_wo_out, train_bin_pca_wo_out, test_bin_pca_wo_out)
     print('-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-')
     bin_svm_params_pears_one_hot = params_4_svm_bin(train_bin_pca_one_hot)
     print("\nDataset used: bin_train_pears_one_hot \n")
-    ##bin_svm_params_pears_one_hot = params_4_svm_bin(train_bin_pears_one_hot)
+    #bin_svm_params_pears_one_hot = params_4_svm_bin(train_bin_pears_one_hot)
     bin_svm_params_pears_one_hot = {'kernel': 'rbf', 'gamma': 0.001, 'degree': 4, 'C': 100}
     [pred_bin_pears_one_hot_svm,true_bin_pears_one_hot_svm] = apply_svm(bin_svm_params_pears_one_hot, train_bin_pears_one_hot, test_bin_pears_one_hot)
     print('-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-')
     print("\nDataset used: bin_train_pears_wo_out \n")
-    ##bin_svm_params_pears_wo_out = params_4_svm_bin(train_bin_pca_one_hot)
+    #bin_svm_params_pears_wo_out = params_4_svm_bin(train_bin_pca_one_hot)
     bin_svm_params_pears_wo_out = {'kernel': 'rbf', 'gamma': 0.001, 'degree': 4, 'C': 200}
     [pred_bin_pears_wo_out_svm,true_bin_pears_wo_out_svm] = apply_svm(bin_svm_params_pears_wo_out, train_bin_pears_wo_out, test_bin_pears_wo_out)
     
@@ -263,44 +263,44 @@ def main():
     print('\n\n ----------------- RANDOM FOREST  -----------------\n\n')
 
     print("\nDataset used: data_pca_one_hot \n")
-    ##rf_params_pca_one_hot = params_4_random_forest(train_data_pca_one_hot)
+    #rf_params_pca_one_hot = params_4_random_forest(train_data_pca_one_hot)
     rf_params_pca_one_hot = {'n_estimators': 180, 'criterion': 'gini'}
     [pred_pca_one_hot_rf,true_pca_rf] = apply_random_forest(rf_params_pca_one_hot, train_data_pca_one_hot, test_data_pca_one_hot)
     print('-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-')
     print("\nDataset used: data_pca_wo_out \n")
-    ##rf_params_pca_wo_out = params_4_random_forest(train_data_pca_wo_out)
+    #rf_params_pca_wo_out = params_4_random_forest(train_data_pca_wo_out)
     rf_params_pca_wo_out = {'n_estimators': 189, 'criterion': 'entropy'}
     [pred_pca_wo_rf,true_pca_wo_rf] = apply_random_forest(rf_params_pca_wo_out, train_data_pca_wo_out, test_data_pca_wo_out)
     print('-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-')
     print("\nDataset used: data_pears_one_hot \n")
-    ##rf_params_pears_one_hot = params_4_random_forest(train_data_pears_one_hot)
+    #rf_params_pears_one_hot = params_4_random_forest(train_data_pears_one_hot)
     rf_params_pears_one_hot = {'n_estimators': 163, 'criterion': 'gini'}
     [pred_pears_one_hot_rf,true_pears_rf] = apply_random_forest(rf_params_pears_one_hot, train_data_pears_one_hot, test_data_pears_one_hot)
     print('-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-')
     print("\nDataset used: data_pears_wo_out \n")
-    ##rf_params_pears_wo_out = params_4_random_forest(train_data_pears_wo_out)
+    #rf_params_pears_wo_out = params_4_random_forest(train_data_pears_wo_out)
     rf_params_pears_wo_out = {'n_estimators': 198, 'criterion': 'gini'}
     [pred_pears_wo_out_rf,true_pears_wo_rf] = apply_random_forest(rf_params_pears_wo_out, train_data_pears_wo_out, test_data_pears_wo_out)
     print('-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-')
     print('--- BINARY CLASSIFICATION ---')
     print('-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-')
     print("\nDataset used: bin_train_pca_one_hot \n")
-    ##bin_rf_params_pca_one_hot = params_4_random_forest_bin(train_bin_pca_one_hot)
+    #bin_rf_params_pca_one_hot = params_4_random_forest_bin(train_bin_pca_one_hot)
     bin_rf_params_pca_one_hot = {'n_estimators': 40, 'criterion': 'entropy'}
     [pred_bin_pca_one_hot_rf,true_bin_pca_one_hot_rf] = apply_random_forest(bin_rf_params_pca_one_hot, train_bin_pca_one_hot, test_bin_pca_one_hot)
     print('-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-')
     print("\nDataset used: bin_train_pca_wo_out \n")
-    ##bin_rf_params_pca_wo_out = params_4_random_forest_bin(train_bin_pca_one_hot)
+    #bin_rf_params_pca_wo_out = params_4_random_forest_bin(train_bin_pca_one_hot)
     bin_rf_params_pca_wo_out = {'n_estimators': 36, 'criterion': 'entropy'}
     [pred_bin_pca_wo_out_rf,true_bin_pca_wo_out_rf] = apply_random_forest(bin_rf_params_pca_wo_out, train_bin_pca_wo_out, test_bin_pca_wo_out)
     print('-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-')
     print("\nDataset used: bin_train_pears_one_hot \n")
-    ##bin_rf_params_pears_one_hot = params_4_random_forest_bin(train_bin_pca_one_hot)
+    #bin_rf_params_pears_one_hot = params_4_random_forest_bin(train_bin_pca_one_hot)
     bin_rf_params_pears_one_hot = {'n_estimators': 55, 'criterion': 'entropy'}			
     [pred_bin_pears_one_hot_rf,true_bin_pears_one_hot_rf] = apply_random_forest(bin_rf_params_pears_one_hot, train_bin_pears_one_hot, test_bin_pears_one_hot)
     print('-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-')
     print("\nDataset used: bin_train_pears_wo_out \n")
-    ##bin_rf_params_pears_wo_out = params_4_random_forest_bin(train_bin_pca_one_hot)
+    #bin_rf_params_pears_wo_out = params_4_random_forest_bin(train_bin_pca_one_hot)
     bin_rf_params_pears_wo_out = {'n_estimators': 68, 'criterion': 'entropy'}
     [pred_bin_pears_wo_out_rf,true_bin_pears_wo_out_rf] = apply_random_forest(bin_rf_params_pears_wo_out, train_bin_pears_wo_out, test_bin_pears_wo_out)
 
@@ -308,44 +308,44 @@ def main():
     print('\n\n ----------------- MLPCLASSIFIER (NEURAL NETWORK)  -----------------\n\n')
 
     print("\nDataset used: data_pca_one_hot \n")
-    ##nn_params_pca_one_hot = params_4_neural_network(train_data_pca_one_hot)
+    #nn_params_pca_one_hot = params_4_neural_network(train_data_pca_one_hot)
     nn_params_pca_one_hot =  {'solver': 'adam', 'momentum': 0.9, 'max_iter': 160, 'learning_rate': 'adaptive', 'hidden_layer_sizes': (215, 172, 129, 86), 'batch_size': 512, 'activation': 'tanh'}
     [pred_pca_one_hot_nn,true_pca_nn] = apply_neural_network(nn_params_pca_one_hot, train_data_pca_one_hot, test_data_pca_one_hot)
     print('-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-')
     print("\nDataset used: data_pca_wo_out \n")
-    ##nn_params_pca_wo_out = params_4_neural_network(train_data_pca_wo_out)
+    #nn_params_pca_wo_out = params_4_neural_network(train_data_pca_wo_out)
     nn_params_pca_wo_out = {'solver': 'adam', 'momentum': 0.9, 'max_iter': 140, 'learning_rate': 'invscaling', 'hidden_layer_sizes': (105, 84, 63, 42), 'batch_size': 128, 'activation': 'relu'} 
     [pred_pca_wo_nn,true_pca_wo_nn] = apply_neural_network(nn_params_pca_wo_out, train_data_pca_wo_out, test_data_pca_wo_out)
     print('-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-')
     print("\nDataset used: data_pears_one_hot \n")
-    ##nn_params_pears_one_hot = params_4_neural_network(train_data_pears_one_hot)
+    #nn_params_pears_one_hot = params_4_neural_network(train_data_pears_one_hot)
     nn_params_pears_one_hot =  {'solver': 'adam', 'momentum': 0.8, 'max_iter': 120, 'learning_rate': 'constant', 'hidden_layer_sizes': (177, 118), 'batch_size': 512, 'activation': 'logistic'}
     [pred_pears_one_hot_nn,true_pears_nn] = apply_neural_network(nn_params_pears_one_hot, train_data_pears_one_hot, test_data_pears_one_hot)
     print('-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-')
     print("\nDataset used: data_pears_wo_out \n")
-    ##nn_params_pears_wo_out = params_4_neural_network(train_data_pears_wo_out)
+    #nn_params_pears_wo_out = params_4_neural_network(train_data_pears_wo_out)
     nn_params_pears_wo_out =  {'solver': 'adam', 'momentum': 0.9, 'max_iter': 120, 'learning_rate': 'invscaling', 'hidden_layer_sizes': (75, 50), 'batch_size': 512, 'activation': 'logistic'}
     [pred_pears_wo_out_nn,true_pears_wo_nn] = apply_neural_network(nn_params_pears_wo_out, train_data_pears_wo_out, test_data_pears_wo_out)
     print('-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-')
     print('--- BINARY CLASSIFICATION ---')
     print('-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-')
     print("\n Dataset used: bin_train_pca_one_hot \n")
-    ##bin_nn_params_pca_one_hot = params_4_neural_network_bin(train_bin_pca_one_hot)
+    #bin_nn_params_pca_one_hot = params_4_neural_network_bin(train_bin_pca_one_hot)
     bin_nn_params_pca_one_hot = {'solver': 'adam', 'momentum': 0.9, 'max_iter': 120, 'learning_rate': 'adaptive', 'hidden_layer_sizes': (129, 86), 'batch_size': 128, 'activation': 'relu'}
     [pred_bin_pca_one_hot_nn,true_bin_pca_one_hot_nn] = apply_neural_network(bin_nn_params_pca_one_hot, train_bin_pca_one_hot, test_bin_pca_one_hot)
     print('-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-')
     print("\nDataset used: bin_train_pca_wo_out \n")
-    ##bin_nn_params_pca_wo_out = params_4_neural_network_bin(train_bin_pca_one_hot)
+    #bin_nn_params_pca_wo_out = params_4_neural_network_bin(train_bin_pca_one_hot)
     bin_nn_params_pca_wo_out = {'solver': 'adam', 'momentum': 0.6, 'max_iter': 120, 'learning_rate': 'adaptive', 'hidden_layer_sizes': (172, 129, 86), 'batch_size': 64, 'activation': 'relu'}
     [pred_bin_pca_wo_out_nn,true_bin_pca_wo_out_nn] = apply_neural_network(bin_nn_params_pca_wo_out, train_bin_pca_wo_out, test_bin_pca_wo_out)
     print('-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-')
     print("\nDataset used: bin_train_pears_one_hot \n")
-    ##bin_nn_params_pears_one_hot = params_4_neural_network_bin(train_bin_pca_one_hot)
+    #bin_nn_params_pears_one_hot = params_4_neural_network_bin(train_bin_pca_one_hot)
     bin_nn_params_pears_one_hot = {'solver': 'adam', 'momentum': 0.8, 'max_iter': 140, 'learning_rate': 'constant', 'hidden_layer_sizes': (172, 129, 86), 'batch_size': 128, 'activation': 'relu'}	
     [pred_bin_pears_one_hot_nn,true_bin_pears_one_hot_nn] = apply_neural_network(bin_nn_params_pears_one_hot, train_bin_pears_one_hot, test_bin_pears_one_hot)
     print('-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-')
     print("\nDataset used: bin_train_pears_wo_out \n")
-    ##bin_nn_params_pears_wo_out = params_4_neural_network_bin(train_bin_pca_one_hot)
+    #bin_nn_params_pears_wo_out = params_4_neural_network_bin(train_bin_pca_one_hot)
     bin_nn_params_pears_wo_out = {'solver': 'adam', 'momentum': 0.8, 'max_iter': 120, 'learning_rate': 'constant', 'hidden_layer_sizes': (172, 129, 86), 'batch_size': 256, 'activation': 'relu'}	
     [pred_bin_pears_wo_out_nn,true_bin_pears_wo_out_nn] = apply_neural_network(bin_nn_params_pears_wo_out, train_bin_pears_wo_out, test_bin_pears_wo_out)
     
@@ -356,9 +356,9 @@ def main():
     #num_histograms(train_data)
     
     ##Obtain all the histograms for non numeric values of the attributes
-    #for i in poss_attr:
-    #    for j in poss_attr[i]:
-    #        print(non_num_histogram(train_data,i,j))
+    for i in poss_attr:
+        for j in poss_attr[i]:
+            print(non_num_histogram(train_data,i,j))
 
     #att = train_data[train_data['class'] != 'normal']
     #not_att = train_data[train_data['class'] == 'normal']

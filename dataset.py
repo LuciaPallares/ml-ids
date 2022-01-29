@@ -1,3 +1,4 @@
+from cProfile import label
 from typing import Protocol
 from numpy.core.fromnumeric import shape
 import pandas as pd
@@ -116,17 +117,20 @@ def calculate_totals(train_data):
     print("Number of TEARDROP attacks: ", teardrop, ";Porcentaje:", round(teardrop*100/tot,3)," %")
     print("Number of WAREZCLIENT attacks: ", warezclient, ";Porcentaje:", round(warezclient*100/tot,3)," %")
     print("Number of WAREZMASTER attacks: ", warezmaster,  ";Porcentaje:",round(warezmaster*100/tot,3)," %")
-    
-    fig = plt.figure()
+    plt.rcParams.update({'font.size' : 15})
+    fig = plt.figure(figsize=(8,6))
     ax = fig.add_subplot(1,1,1)
     
+
     ax.bar(['dos \n {} %'.format(round(dos*100/tot,3))], [dos*100/tot], color="r")
     ax.bar(['probe \n {} %'.format(round(probe*100/tot,3))], [probe*100/tot], color="g")
     ax.bar(['r2l \n {} %'.format(round(r2l*100/tot,3))], [r2l*100/tot], color="b")
     ax.bar(['u2r \n {} %'.format(round(u2r*100/tot,3))], [u2r*100/tot], color="y")
-    plt.ylabel('total % ')    
+    plt.ylabel('total % ',fontsize=20)
+    plt.legend(['dos','probe','r2l','u2r'], fontsize=20)
+    
 
-    fig.savefig('figures/type_attack.png')
+    fig.savefig('figures/type_attack_2.png')
 
 def binary_datasets(train, test):
     bin_train = copy.deepcopy(train) 
@@ -196,7 +200,8 @@ def non_num_histogram(data, attrib, at_value):
             #Total attacks with that value
             at_val = len(at[at[attrib] == at_value].index)
             go_val = len(go[go[attrib] == at_value].index)
-            fig = plt.figure()
+            plt.rcParams.update({'font.size' : 15})
+            fig = plt.figure(figsize=(8,6))
             ax = fig.add_subplot(1,1,1)
             plt.ylim(0,tot_val)
             ax.bar(['attacks \n {}'.format(at_val)], [at_val], color="r")
@@ -241,7 +246,8 @@ def num_histograms(data):
         not_att = data[data['class'] == 'normal']
         min_at = min(data[i])
         max_at = max(data[i])
-        fig = plt.figure()
+        plt.rcParams.update({'font.size' : 15})
+        fig = plt.figure(figsize=(9,6))
         bins = np.linspace(min_at, max_at)
         x = att[i]
         y = not_att[i]
